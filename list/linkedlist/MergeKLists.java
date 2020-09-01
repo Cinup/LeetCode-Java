@@ -29,7 +29,6 @@ public class MergeKLists {
                 head = head.next;
             }
         }
-        //Array to List
         Collections.sort(nodeList);
         ListNode head = new ListNode(0);
         ListNode current = head;

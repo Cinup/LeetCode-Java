@@ -3,38 +3,57 @@ package leetcode.other;
 /*
  * @description: 29.两数相除
  * @param: dividend被除数,divisor除数
- * @return:
+ * @return: 商(取整)
  * @author: cp
  * @date: 2020/8/31
  */
 public class Divide {
     public int divide(int dividend, int divisor) {
-        //负数溢出
-        if (dividend == Integer.MIN_VALUE) {
-            if (divisor == -1)
-                return Integer.MAX_VALUE;
-            if (divisor == 1)
-                return Integer.MIN_VALUE;
+        int ans = -1;
+        int sign = 1;
+        if (dividend > 0) {
+            sign = opposite(sign);
+            dividend = opposite(dividend);
         }
-        if (dividend == 0) {
+        if (divisor > 0) {
+            sign = opposite(sign);
+            divisor = opposite(divisor);
+        }
+        //由于被除数和除数都是负数,如果dividend>divisor
+        //说明|dividend|<|divisor|
+        //即|dividend|/|divisor| < 1,结果就是0
+        if (dividend > divisor) {
             return 0;
         }
-        boolean negative = false;
-        //被除数和除数中有负数
-        if (((dividend >>> 31) | (divisor >>> 31)) == 1) {
-            //结果是负数
-            if (((dividend >>> 31) & (divisor >>> 31)) != 1) {
-                negative = true;
-            }
-            dividend = dividend < 0 ? dividend : -dividend;
-            divisor = divisor < 0 ? divisor : -divisor;
-        }
-        int ans = 0;
-        while (dividend > 0) {
+        int originDividend = dividend;
+        int originDivisor = divisor;
+        dividend -= divisor;
+        while (divisor >= dividend) {
+            ans = ans + ans;
+            divisor += divisor;
             dividend -= divisor;
-            if (dividend >= 0)
-                ans++;
         }
-        return negative ? -ans : ans;
+
+        int a = ans + opposite(divide(originDividend - divisor, originDivisor));
+        if (a == Integer.MIN_VALUE) {
+            if (sign > 0) {
+                return Integer.MAX_VALUE;
+            } else {
+                return Integer.MIN_VALUE;
+            }
+        } else {
+            if (sign > 0) {
+                return opposite(a);
+            } else {
+                return a;
+            }
+        }
+    }
+
+    /*
+     * @description: 取相反数
+     */
+    private int opposite(int x) {
+        return ~x + 1;
     }
 }

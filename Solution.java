@@ -5,6 +5,11 @@ import leetcode.entity.ListNode;
 import java.util.*;
 
 class Solution {
+    public static void main(String[] args) {
+        String s = "barfoothefoobarman";
+        System.out.println(s.indexOf("foo"));
+    }
+
     /*
      * @description: 1.两数之和,从数组中找出a,b使其和为目标值c
      * @param: nums数组,target目标值
@@ -356,6 +361,9 @@ class Solution {
      */
     public String intToRoman(int num) {
         StringBuilder result = new StringBuilder();
+        String[] hundreds = new String[]{"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+        String[] tens = new String[]{"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+        String[] ones = new String[]{"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
         //千位
         int thousand = num / 1000;
         for (int i = 0; i < thousand; i++) {
@@ -363,101 +371,11 @@ class Solution {
         }
         //百位
         int hundred = num % 1000 / 100;
-        switch (hundred) {
-            case 1:
-                result.append("C");
-                break;
-            case 2:
-                result.append("CC");
-                break;
-            case 3:
-                result.append("CCC");
-                break;
-            case 4:
-                result.append("CD");
-                break;
-            case 5:
-                result.append("D");
-                break;
-            case 6:
-                result.append("DC");
-                break;
-            case 7:
-                result.append("DCC");
-                break;
-            case 8:
-                result.append("DCCC");
-                break;
-            case 9:
-                result.append("CM");
-                break;
-            case 0:
-                break;
-        }
+        result.append(hundreds[hundred]);
         int ten = num % 100 / 10;
-        switch (ten) {
-            case 1:
-                result.append("X");
-                break;
-            case 2:
-                result.append("XX");
-                break;
-            case 3:
-                result.append("XXX");
-                break;
-            case 4:
-                result.append("XL");
-                break;
-            case 5:
-                result.append("L");
-                break;
-            case 6:
-                result.append("LX");
-                break;
-            case 7:
-                result.append("LXX");
-                break;
-            case 8:
-                result.append("LXXX");
-                break;
-            case 9:
-                result.append("XC");
-                break;
-            case 0:
-                break;
-        }
+        result.append(tens[ten]);
         int one = num % 10;
-        switch (one) {
-            case 1:
-                result.append("I");
-                break;
-            case 2:
-                result.append("II");
-                break;
-            case 3:
-                result.append("III");
-                break;
-            case 4:
-                result.append("IV");
-                break;
-            case 5:
-                result.append("V");
-                break;
-            case 6:
-                result.append("VI");
-                break;
-            case 7:
-                result.append("VII");
-                break;
-            case 8:
-                result.append("VIII");
-                break;
-            case 9:
-                result.append("IX");
-                break;
-            case 0:
-                break;
-        }
+        result.append(ones[one]);
         return result.toString();
     }
 
@@ -611,5 +529,298 @@ class Solution {
                 ans.add(l1.get(i) + l2.get(j));
             }
         return ans;
+    }
+
+    /*
+     * @description: 18.四数之和
+     * @param: nums数组,target目标值
+     * @return: 寻找所有不重复的a,b,c,d,使得a+b+c+d=target
+     */
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        List<List<Integer>> result = new ArrayList<>();
+        //对数组进行排序
+        Arrays.sort(nums);
+        int length = nums.length;
+        for (int i = 0; i < length - 1; i++) {
+            if (nums[i] > target) {
+                break;
+            }
+            if (i > 0 && (nums[i] == nums[i - 1])) {
+                continue;
+            }
+            for (int j = i + 1; j < length; j++) {
+                if (nums[i] + nums[j] > target) {
+                    break;
+                }
+                if (j > i + 1 && (nums[j] == nums[j - 1])) {
+                    continue;
+                }
+                int l = j + 1, r = length - 1;
+                while (l < r) {
+                    int sum = nums[i] + nums[j] + nums[l] + nums[r];
+                    if (sum == target) {
+                        List<Integer> list = new ArrayList<>();
+                        list.add(nums[i]);
+                        list.add(nums[j]);
+                        list.add(nums[l]);
+                        list.add(nums[r]);
+                        result.add(list);
+                        while (l < r && (nums[l + 1] == nums[l])) l++;
+                        while (l < r && (nums[r - 1] == nums[r])) r--;
+                        l++;
+                        r--;
+                    }
+                    //加大l
+                    if ((target - sum) > 0) {
+                        l++;
+                    }
+                    //减小r
+                    if ((target - sum) < 0) {
+                        r--;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    /*
+     * @description: 19.删除链表的倒数第N个节点
+     * @param: head为链表头结点,n为待删除待倒数第n个,保证n是有效的
+     * @return: 返回删除后的头结点
+     */
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        ListNode result = head;
+        ListNode tmpNode = head;
+        //计算链表长度
+        int length = 0;
+        while (tmpNode != null) {
+            length++;
+            tmpNode = tmpNode.next;
+        }
+        //定位到第n个,就是正数length-n+1
+        int index = length - n;
+        //如果删除的是第一个,直接删除
+        if (index == 0) {
+            return result.next;
+        }
+        tmpNode = head;
+        ListNode pre = null;
+        while (index > 0) {
+            pre = tmpNode;
+            tmpNode = tmpNode.next;
+            index--;
+        }
+        pre.next = tmpNode.next;
+        return result;
+    }
+
+    /*
+     * @description: 22.括号生成
+     * @param: n括号对数
+     * @return: 所有有效的可能性组合数
+     */
+    public List<String> generateParenthesis(int n) {
+        List<String> result = new ArrayList<>();
+        generate(result, 0, 0, "", n);
+        return result;
+    }
+
+    private void generate(List<String> result, int l, int r, String s, int n) {
+        if (l == n && r == n) {
+            result.add(s.toString());
+            return;
+        }
+        if (l < n) {
+            generate(result, l + 1, r, s + "(", n);
+        }
+        if (r < l) {
+            generate(result, l, r + 1, s + ")", n);
+        }
+    }
+
+    /*
+     * @description: 23.合并K个升序链表
+     * @param: lists链表数组
+     * @return: 合并后链表头
+     */
+    public ListNode mergeKLists(ListNode[] lists) {
+        if (lists.length == 0) {
+            return null;
+        }
+        if (lists.length == 1) {
+            return lists[0];
+        }
+        List<Integer> nodeList = new ArrayList<>();
+        for (int i = 0; i < lists.length; i++) {
+            ListNode head = lists[i];
+            while (head != null) {
+                nodeList.add(head.val);
+                head = head.next;
+            }
+        }
+        Collections.sort(nodeList);
+        ListNode head = new ListNode(0);
+        ListNode current = head;
+        for (int i = 0; i < nodeList.size(); i++) {
+            ListNode node = new ListNode(nodeList.get(i));
+            current.next = node;
+            current = node;
+        }
+        return head.next;
+    }
+
+    /*
+     * @description: 24.两两交换链表中的节点
+     * @param: head链表头
+     * @return: 交换后的链表
+     */
+    public ListNode swapPairs(ListNode head) {
+        //链表只有0个或1个结点时,无法交换
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode current = head;
+        ListNode next = head.next;
+        current.next = swapPairs(next.next);
+        next.next = current;
+        return next;
+    }
+
+    /*
+     * @description: 25.K个一组翻转链表
+     * @param: head链表头结点,k数量
+     * @return: 反转后的链表
+     */
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if (head == null || head.next == null || k == 0) {
+            return head;
+        }
+        ListNode index = head;
+        int i = k;
+        while (i - 1 > 0) {
+            index = index.next;
+            if (index == null) {
+                return head;
+            }
+            i--;
+        }
+        ListNode temp = index.next;
+        index.next = null;
+        ListNode newHead = reverse(head);
+        head.next = reverseKGroup(temp, k);
+        return newHead;
+    }
+
+    private ListNode reverse(ListNode head) {
+        ListNode newHead = head;
+        while (head.next != null) {
+            ListNode next = head.next;
+            head.next = next.next;
+            next.next = newHead;
+            newHead = next;
+        }
+        return newHead;
+    }
+
+    /*
+     * @description: 29.两数相除
+     * @param: dividend被除数,divisor除数
+     * @return: 商(取整)
+     */
+    public int divide(int dividend, int divisor) {
+        int ans = -1;
+        int sign = 1;
+        if (dividend > 0) {
+            sign = opposite(sign);
+            dividend = opposite(dividend);
+        }
+        if (divisor > 0) {
+            sign = opposite(sign);
+            divisor = opposite(divisor);
+        }
+        //由于被除数和除数都是负数,如果dividend>divisor
+        //说明|dividend|<|divisor|
+        //即|dividend|/|divisor| < 1,结果就是0
+        if (dividend > divisor) {
+            return 0;
+        }
+        int originDividend = dividend;
+        int originDivisor = divisor;
+        dividend -= divisor;
+        while (divisor >= dividend) {
+            ans = ans + ans;
+            divisor += divisor;
+            dividend -= divisor;
+        }
+
+        int a = ans + opposite(divide(originDividend - divisor, originDivisor));
+        if (a == Integer.MIN_VALUE) {
+            if (sign > 0) {
+                return Integer.MAX_VALUE;
+            } else {
+                return Integer.MIN_VALUE;
+            }
+        } else {
+            if (sign > 0) {
+                return opposite(a);
+            } else {
+                return a;
+            }
+        }
+    }
+
+    /*
+     * @description: 取相反数
+     */
+    private int opposite(int x) {
+        return ~x + 1;
+    }
+
+    /*
+     * @description: 30.串联所有单词的子串
+     * @param: s字符串,words字串,words中所有字符串长度相等
+     * @return: 符合条件的字符串起始下标
+     */
+    public List<Integer> findSubstring(String s, String[] words) {
+        List<Integer> result = new ArrayList<>();
+        //字符串数量
+        final int wordsNum = words.length;
+        if (wordsNum == 0 || s.isEmpty())
+            return result;
+        //字符串长度
+        final int wordLength = words[0].length();
+        Map<String, Integer> wordsMap = new HashMap<>();
+        for (int i = 0; i < wordsNum; i++) {
+            int num = wordsMap.getOrDefault(words[i], 0);
+            num++;
+            wordsMap.put(words[i], num);
+        }
+        //遍历字符串
+        int end = s.length() - wordsNum * wordLength + 1;
+        for (int i = 0; i < end; i++) {
+            Map<String, Integer> existMap = new HashMap<>();
+            int num = 0;
+            while (num < wordsNum) {
+                String word = s.substring(i + num * wordLength, i + (num + 1) * wordLength);
+                //如果当前字符串是words中
+                if (wordsMap.containsKey(word)) {
+                    //已经相等
+                    int wordNum = existMap.getOrDefault(word, 0);
+                    if (wordNum == wordsMap.get(word)) {
+                        break;
+                    }
+                    wordNum++;
+                    existMap.put(word, wordNum);
+                } else {
+                    break;
+                }
+                num++;
+            }
+            if (num == wordsNum) {
+                result.add(i);
+            }
+        }
+        return result;
     }
 }

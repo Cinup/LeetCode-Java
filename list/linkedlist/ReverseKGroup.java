@@ -3,9 +3,9 @@ package leetcode.list.linkedlist;
 import leetcode.entity.ListNode;
 
 /*
- * @description: 25.K 个一组翻转链表
+ * @description: 25.K个一组翻转链表
  * @param: head链表头结点,k数量
- * @return: 连续k个反转后都头结点
+ * @return: 反转后的链表
  * @author: cp
  * @date: 2020/8/31
  */
