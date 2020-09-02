@@ -1,14 +1,11 @@
 package leetcode;
 
+import leetcode.entity.Entry;
 import leetcode.entity.ListNode;
 
 import java.util.*;
 
 class Solution {
-    public static void main(String[] args) {
-        String s = "barfoothefoobarman";
-        System.out.println(s.indexOf("foo"));
-    }
 
     /*
      * @description: 1.两数之和,从数组中找出a,b使其和为目标值c
@@ -820,6 +817,194 @@ class Solution {
             if (num == wordsNum) {
                 result.add(i);
             }
+        }
+        return result;
+    }
+
+    /*
+     * @description: 31.下一个排列
+     * @param: nums数组
+     * @return:
+     */
+    public void nextPermutation(int[] nums) {
+        int end = nums.length - 1;
+        int i;
+        boolean needSort = true;
+        for (i = end; i > 0; i--) {
+            if (nums[i - 1] < nums[i]) {
+                i--;
+                needSort = false;
+                break;
+            }
+        }
+        //如果i==0说明数组是逆序的,
+        if (i == 0 && needSort) {
+            Arrays.sort(nums);
+            return;
+        }
+        int j;
+        //找到第一个比nums[i]大的数字
+        for (j = end; j > i; j--) {
+            if (nums[j] > nums[i])
+                break;
+        }
+        //交换nums[i],nums[j]
+        int temp;
+        temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+        Arrays.sort(nums, i + 1, nums.length);
+    }
+
+    /*
+     * @description: 32.最长有效括号
+     * @param: s字符串,仅包含'('和')'
+     * @return: 输出最长有效括号的长度
+     */
+    public int longestValidParentheses(String s) {
+        int result = 0;
+        if (s == null || s.length() < 2) {
+            return result;
+        }
+
+        Stack<Entry> stack = new Stack<>();
+        boolean[] valid = new boolean[s.length()];
+        for (int i = 0, length = s.length(); i < length; i++) {
+            char c = s.charAt(i);
+            //1.栈为空
+            //2.左括号
+            if (stack.isEmpty() || c == '(') {
+                Entry entry = new Entry(i, c);
+                stack.push(entry);
+                continue;
+            }
+            //栈不为空且为右括号
+            Entry topEntry = stack.peek();
+            if (topEntry.getC() == '(') {
+                valid[i] = true;
+                valid[topEntry.getIndex()] = true;
+                stack.pop();
+            } else {
+                Entry entry = new Entry(i, c);
+                stack.push(entry);
+            }
+        }
+        int tempRusult = 0;
+        for (int i = 0, length = valid.length; i < length; i++) {
+            if (valid[i]) {
+                tempRusult++;
+                result = Math.max(result, tempRusult);
+            } else {
+                tempRusult = 0;
+            }
+        }
+        return result;
+    }
+
+    /*
+     * @description: 33.搜索旋转排序数组,[0,1,2,4,5,6,7]-->[4,5,6,7,0,1,2]
+     * @param: nums数组,target目标值
+     * @return: target在数组中的下标,返回-1表示target不存在
+     * @date: 2020/9/2
+     */
+    public int search(int[] nums, int target) {
+        if (nums.length == 0)
+            return -1;
+        if (nums.length == 1)
+            return nums[0] == target ? 0 : -1;
+        int l = 0, r = nums.length - 1;
+        int n = r;
+        while (l <= r) {
+            int mid = (l + r) / 2;
+            if (nums[mid] == target)
+                return mid;
+            //[l,mid]有序
+            // l        mid      r
+            //[4, 5, 6, 7, 1, 2, 3]中找5
+            if (nums[l] <= nums[mid]) {
+                //target范围在[[nums[l],nums[mid])之间,范围缩小到[l,mid-1]
+                if (target >= nums[l] && target < nums[mid])
+                    r = mid - 1;
+                    //否则范围为[mid+1,r]
+                else
+                    l = mid + 1;
+            } else {
+                //[mid,r]有序
+                // l        mid      r
+                //[5, 6, 7, 1, 2, 3, 4]
+                //target范围在([nums[mid],nums[n]]之间,范围缩小到(mid+1,r]
+                if (target > nums[mid] && target <= nums[n])
+                    l = mid + 1;
+                    //否则范围为[l,mid-1]
+                else
+                    r = mid - 1;
+            }
+        }
+        return -1;
+    }
+
+    /*
+     * @description: 34.在排序数组中查找元素的第一个和最后一个位置
+     * @param: nums目标数组,target目标值
+     * @return: 返回最先出现target和最后出现target的数组下标,返回[-1,-1]表示数组中不存在目标值
+     */
+    public int[] searchRange(int[] nums, int target) {
+        int[] result = {-1, -1};
+        if (nums.length == 0)
+            return result;
+        //二分搜索,先搜最小值,再搜最大值
+        int min = searchLeft(nums, target);
+        //第一遍搜索发现目标值不存在,不需要第二遍搜索了
+        if (min == -1) return result;
+        int max = searchRight(nums, target);
+        //返回下标
+        return new int[]{min, max};
+    }
+
+    private int searchLeft(int[] nums, int target) {
+        int l = 0;
+        int r = nums.length - 1;
+        while (l <= r) {
+            int mid = (l + r) >> 1;
+            if (nums[mid] >= target)
+                r = mid - 1;
+            else
+                l = mid + 1;
+        }
+        if (l >= nums.length || nums[l] != target) {
+            return -1;
+        }
+        return l;
+    }
+
+    private int searchRight(int[] nums, int target) {
+        int l = 0;
+        int r = nums.length - 1;
+        while (l <= r) {
+            int mid = (l + r) >> 1;
+            if (nums[mid] > target)
+                r = mid - 1;
+            else
+                l = mid + 1;
+        }
+        if (r < 0 || nums[r] != target) {
+            return -1;
+        }
+        return r;
+    }
+
+    /*
+     * @description: 35.搜索插入位置
+     * @param: nums有序数组,target插入值
+     * @return: target插入位置
+     */
+    public int searchInsert(int[] nums, int target) {
+        int result = 0;
+        if (nums.length == 0)
+            return result;
+        for (; result < nums.length; result++) {
+            if (target <= nums[result])
+                break;
         }
         return result;
     }

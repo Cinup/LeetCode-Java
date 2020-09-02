@@ -19,6 +19,9 @@ package leetcode.other;
 public class IntToRoman {
     public String intToRoman(int num) {
         StringBuilder result = new StringBuilder();
+        String[] hundreds = new String[]{"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+        String[] tens = new String[]{"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+        String[] ones = new String[]{"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
         //千位
         int thousand = num / 1000;
         for (int i = 0; i < thousand; i++) {
@@ -26,101 +29,11 @@ public class IntToRoman {
         }
         //百位
         int hundred = num % 1000 / 100;
-        switch (hundred) {
-            case 1:
-                result.append("C");
-                break;
-            case 2:
-                result.append("CC");
-                break;
-            case 3:
-                result.append("CCC");
-                break;
-            case 4:
-                result.append("CD");
-                break;
-            case 5:
-                result.append("D");
-                break;
-            case 6:
-                result.append("DC");
-                break;
-            case 7:
-                result.append("DCC");
-                break;
-            case 8:
-                result.append("DCCC");
-                break;
-            case 9:
-                result.append("CM");
-                break;
-            case 0:
-                break;
-        }
+        result.append(hundreds[hundred]);
         int ten = num % 100 / 10;
-        switch (ten) {
-            case 1:
-                result.append("X");
-                break;
-            case 2:
-                result.append("XX");
-                break;
-            case 3:
-                result.append("XXX");
-                break;
-            case 4:
-                result.append("XL");
-                break;
-            case 5:
-                result.append("L");
-                break;
-            case 6:
-                result.append("LX");
-                break;
-            case 7:
-                result.append("LXX");
-                break;
-            case 8:
-                result.append("LXXX");
-                break;
-            case 9:
-                result.append("XC");
-                break;
-            case 0:
-                break;
-        }
+        result.append(tens[ten]);
         int one = num % 10;
-        switch (one) {
-            case 1:
-                result.append("I");
-                break;
-            case 2:
-                result.append("II");
-                break;
-            case 3:
-                result.append("III");
-                break;
-            case 4:
-                result.append("IV");
-                break;
-            case 5:
-                result.append("V");
-                break;
-            case 6:
-                result.append("VI");
-                break;
-            case 7:
-                result.append("VII");
-                break;
-            case 8:
-                result.append("VIII");
-                break;
-            case 9:
-                result.append("IX");
-                break;
-            case 0:
-                break;
-        }
+        result.append(ones[one]);
         return result.toString();
     }
 }

@@ -1,5 +1,12 @@
 package leetcode.list.array;
 
+/*
+ * @description: 34.在排序数组中查找元素的第一个和最后一个位置
+ * @param: nums目标数组,target目标值
+ * @return: 返回最先出现target和最后出现target的数组下标
+ * @author: cp
+ * @date: 2020/9/2
+ */
 public class SearchRange {
     public int[] searchRange(int[] nums, int target) {
         int[] result = {-1, -1};
@@ -16,51 +23,33 @@ public class SearchRange {
 
     private int searchLeft(int[] nums, int target) {
         int l = 0;
-        int r = nums.length;
-        while (l < r) {
+        int r = nums.length - 1;
+        while (l <= r) {
             int mid = (l + r) >> 1;
             if (nums[mid] >= target)
-                r = mid;
+                r = mid - 1;
             else
-                l = mid;
+                l = mid + 1;
         }
-        if (l < nums.length) {
-            if (nums[l] == target)
-                return l;
+        if (l >= nums.length || nums[l] != target) {
+            return -1;
         }
-        return -1;
+        return l;
     }
 
     private int searchRight(int[] nums, int target) {
         int l = 0;
-        int r = nums.length;
-        while (l < r) {
+        int r = nums.length - 1;
+        while (l <= r) {
             int mid = (l + r) >> 1;
             if (nums[mid] > target)
-                r = mid;
+                r = mid - 1;
             else
                 l = mid + 1;
         }
-        if (l < nums.length) {
-            if (nums[l] == target)
-                return l;
+        if (r < 0 || nums[r] != target) {
+            return -1;
         }
-        return -1;
-    }
-
-    //todo
-    private int search(int[] nums, int target) {
-        int lo = 0;
-        int hi = nums.length;
-
-        while (lo < hi) {
-            int mid = (lo + hi) / 2;
-            if (nums[mid] > target) {
-                hi = mid;
-            } else {
-                lo = mid + 1;
-            }
-        }
-        return lo;
+        return r;
     }
 }
