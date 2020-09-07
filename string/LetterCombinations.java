@@ -16,25 +16,31 @@ public class LetterCombinations {
         if (digits.isEmpty()) {
             return result;
         }
-        String digitLetter[] = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        String[] letter = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        List<String>[] digitList = getListArray(letter);
         for (int i = 0; i < digits.length(); i++) {
-            List<String> charList = getList(digitLetter[digits.charAt(i) - '0']);
+            List<String> charList = digitList[digits.charAt(i) - '0'];
             result = multiply(result, charList);
         }
         return result;
     }
 
     //字符串转链表
-    public List<String> getList(String s) {
-        List<String> result = new ArrayList<>();
-        for (int i = 0; i < s.length(); i++) {
-            result.add(s.charAt(i) + "");
+    private List<String>[] getListArray(String[] letters) {
+        List<String>[] letterList = new ArrayList[letters.length];
+        for (int i = 0; i < letters.length; i++) {
+            String digit = letters[i];
+            List<String> result = new ArrayList<>();
+            for (int j = 0; j < digit.length(); j++) {
+                result.add(digit.charAt(j) + "");
+            }
+            letterList[i] = result;
         }
-        return result;
+        return letterList;
     }
 
     //链表相乘
-    public List<String> multiply(List<String> l1, List<String> l2) {
+    private List<String> multiply(List<String> l1, List<String> l2) {
         if (l1.isEmpty() || l2.isEmpty()) {
             return l1.isEmpty() ? l2 : l1;
         }

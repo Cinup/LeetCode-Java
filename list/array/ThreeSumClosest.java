@@ -15,7 +15,7 @@ public class ThreeSumClosest {
         Arrays.sort(nums);
         int length = nums.length;
         int result = Integer.MAX_VALUE;
-        int gap = Integer.MAX_VALUE;
+        int minGap = Integer.MAX_VALUE;
         for (int i = 0; i < length; i++) {
             int l = i + 1, r = length - 1;
             while (l < r) {
@@ -30,10 +30,10 @@ public class ThreeSumClosest {
                 if (sum < target) {
                     l++;
                 }
-                int tmp = Math.abs(sum - target);
-                if (tmp < gap) {
+                int gap = Math.abs(sum - target);
+                if (gap < minGap) {
                     result = sum;
-                    gap = tmp;
+                    minGap = gap;
                 }
             }
         }

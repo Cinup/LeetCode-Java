@@ -19,7 +19,7 @@ public class GenerateParenthesis {
 
     public void generate(List<String> result, int l, int r, String s, int n) {
         if (l == n && r == n) {
-            result.add(s.toString());
+            result.add(s);
             return;
         }
         if (l < n) {

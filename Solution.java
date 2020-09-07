@@ -2,14 +2,14 @@ package leetcode;
 
 import leetcode.entity.Entry;
 import leetcode.entity.ListNode;
+import leetcode.entity.TreeNode;
 
 import java.util.*;
 
 class Solution {
-
     /*
      * @description: 1.两数之和,从数组中找出a,b使其和为目标值c
-     * @param: nums数组,target目标值
+     * @param: nums int数组,target目标值
      * @return: a,b数组下标
      */
     public int[] twoSum(int[] nums, int target) {
@@ -30,7 +30,7 @@ class Solution {
 
     /*
      * @description: 2.两数相加,将两个链表每个结点相加
-     * @param: l1,l2两个非空链表
+     * @param: l1,l2非空链表
      * @return: 相加后的结果链表
      */
     public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
@@ -79,8 +79,6 @@ class Solution {
      * @description: 4.寻找两个正序数组的中位数,时间复杂度O(log(m + n))
      * @param: nums1,nums2数组
      * @return: 中位数
-     * @author: cp
-     * @date: 2020/8/1
      */
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
         int length1 = nums1.length, length2 = nums2.length;
@@ -95,7 +93,7 @@ class Solution {
 
     /*
      * @description: 获取两个数组中第k大的数
-     * num1,num2为两个数组,index1为num1起始下标,index2为num2起始下标,k为第k个
+     * @param: num1,num2为 int数组,index1为num1起始下标,index2为num2起始下标,k为第k个
      */
     private int getTopK(int[] nums1, int index1, int[] nums2, int index2, int k) {
         if (index1 >= nums1.length) {
@@ -297,27 +295,27 @@ class Solution {
 
     /*
      * @description: 10.正则表达式匹配
-     * @param: s字符串,p正则表达式,p只包含"."和"*",
-     * '.' 匹配任意单个字符
-     * '*' 匹配零个或多个前面的那一个元素
+     * @param: s字符串,p正则表达式,
      * s 可能为空，且只包含从 a-z 的小写字母。
      * p 可能为空，且只包含从 a-z 的小写字母，以及字符 . 和 *。
+     * '.' 匹配任意单个字符
+     * '*' 匹配零个或多个前面的那一个元素
      * @return: true匹配,false不匹配
      */
     public boolean isMatch(String s, String p) {
         if (p.isEmpty()) return s.isEmpty();
-        boolean first_match = (!s.isEmpty() &&
+        boolean firstCharMatch = (!s.isEmpty() &&
                 (p.charAt(0) == s.charAt(0) || p.charAt(0) == '.'));
         //存在*时
         if (p.length() >= 2 && p.charAt(1) == '*') {
             //两种情况
-            //1 .*匹配空字符串
-            //2 .*匹配一个字符串
+            //1 x*匹配空字符串
+            //2 x*匹配一个字符串
             return (isMatch(s, p.substring(2)) ||
-                    (first_match && isMatch(s.substring(1), p)));
+                    (firstCharMatch && isMatch(s.substring(1), p)));
         } else {
             //不存在*时
-            return first_match && isMatch(s.substring(1), p.substring(1));
+            return firstCharMatch && isMatch(s.substring(1), p.substring(1));
         }
     }
 
@@ -348,13 +346,13 @@ class Solution {
      * @return: 对应的罗马字符
      * 字符          数值
      * 字符          数值
-        I             1
-        V             5
-        X             10
-        L             50
-        C             100
-        D             500
-        M             1000
+     *  I             1
+     *  V             5
+     *  X             10
+     *  L             50
+     *  C             100
+     *  D             500
+     *  M             1000
      */
     public String intToRoman(int num) {
         StringBuilder result = new StringBuilder();
@@ -407,7 +405,7 @@ class Solution {
 
     /*
      * @description: 15.三数之和
-     * @param: nums数组
+     * @param: nums int数组
      * @return: 所有[a,b,c]使得a+b+c=0且a,b,c不重复
      */
     public List<List<Integer>> threeSum(int[] nums) {
@@ -463,7 +461,7 @@ class Solution {
         Arrays.sort(nums);
         int length = nums.length;
         int result = Integer.MAX_VALUE;
-        int gap = Integer.MAX_VALUE;
+        int minGap = Integer.MAX_VALUE;
         for (int i = 0; i < length; i++) {
             int l = i + 1, r = length - 1;
             while (l < r) {
@@ -478,10 +476,10 @@ class Solution {
                 if (sum < target) {
                     l++;
                 }
-                int tmp = Math.abs(sum - target);
-                if (tmp < gap) {
+                int gap = Math.abs(sum - target);
+                if (gap < minGap) {
                     result = sum;
-                    gap = tmp;
+                    minGap = gap;
                 }
             }
         }
@@ -498,34 +496,44 @@ class Solution {
         if (digits.isEmpty()) {
             return result;
         }
-        String digitLetter[] = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        String[] letter = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        List<String>[] digitList = getListArray(letter);
         for (int i = 0; i < digits.length(); i++) {
-            List<String> charList = getList(digitLetter[digits.charAt(i) - '0']);
+            List<String> charList = digitList[digits.charAt(i) - '0'];
             result = multiply(result, charList);
         }
         return result;
     }
 
-    //字符串转链表
-    private List<String> getList(String s) {
-        List<String> result = new ArrayList<>();
-        for (int i = 0; i < s.length(); i++) {
-            result.add(s.charAt(i) + "");
+    /*
+     * @description: 字符串数组转List数组
+     */
+    private List<String>[] getListArray(String[] letters) {
+        List<String>[] letterList = new ArrayList[letters.length];
+        for (int i = 0; i < letters.length; i++) {
+            String digit = letters[i];
+            List<String> result = new ArrayList<>();
+            for (int j = 0; j < digit.length(); j++) {
+                result.add(digit.charAt(j) + "");
+            }
+            letterList[i] = result;
         }
-        return result;
+        return letterList;
     }
 
-    //链表相乘
+    /*
+     * @description: 笛卡尔积
+     */
     private List<String> multiply(List<String> l1, List<String> l2) {
         if (l1.isEmpty() || l2.isEmpty()) {
             return l1.isEmpty() ? l2 : l1;
         }
-        List<String> ans = new ArrayList<>();
+        List<String> result = new ArrayList<>();
         for (int i = 0; i < l1.size(); i++)
             for (int j = 0; j < l2.size(); j++) {
-                ans.add(l1.get(i) + l2.get(j));
+                result.add(l1.get(i) + l2.get(j));
             }
-        return ans;
+        return result;
     }
 
     /*
@@ -599,7 +607,9 @@ class Solution {
         int index = length - n;
         //如果删除的是第一个,直接删除
         if (index == 0) {
-            return result.next;
+            ListNode next = result.next;
+            result.next = null;
+            return next;
         }
         tmpNode = head;
         ListNode pre = null;
@@ -625,7 +635,7 @@ class Solution {
 
     private void generate(List<String> result, int l, int r, String s, int n) {
         if (l == n && r == n) {
-            result.add(s.toString());
+            result.add(s);
             return;
         }
         if (l < n) {
@@ -747,8 +757,8 @@ class Solution {
         dividend -= divisor;
         while (divisor >= dividend) {
             ans = ans + ans;
-            divisor += divisor;
             dividend -= divisor;
+            divisor += divisor;
         }
 
         int a = ans + opposite(divide(originDividend - divisor, originDivisor));
@@ -767,9 +777,6 @@ class Solution {
         }
     }
 
-    /*
-     * @description: 取相反数
-     */
     private int opposite(int x) {
         return ~x + 1;
     }
@@ -823,7 +830,7 @@ class Solution {
 
     /*
      * @description: 31.下一个排列
-     * @param: nums数组
+     * @param: nums,int数组
      * @return:
      */
     public void nextPermutation(int[] nums) {
@@ -1007,5 +1014,652 @@ class Solution {
                 break;
         }
         return result;
+    }
+
+    /*
+     * @description: 36.有效的数独
+     * @param: board 9*9的表格
+     * @return: true为有效,false无效
+     * @author: cp
+     * @date: 2020/9/5
+     */
+    public boolean isValidSudoku(char[][] board) {
+        Set<String> set = new HashSet<>();
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (board[i][j] != '.') {
+                    String s = "(" + board[i][j] + ")";
+                    if (!set.add(s + i) || !set.add(j + s) || !set.add(i / 3 + s + j / 3))
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /*
+     * @description: 37.解数独
+     * @param: board 9*9的表格
+     * @return:
+     */
+    public void solveSudoku(char[][] board) {
+        solver(board);
+    }
+
+    private boolean solver(char[][] board) {
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (board[i][j] == '.') {
+                    //从1尝试到9
+                    char num = '1';
+                    while (num <= '9') {
+                        //当前数字是否已经被填过了
+                        if (isValid(i, j, board, num)) {
+                            board[i][j] = num;
+                            if (solver(board)) {
+                                return true;
+                            } else {
+                                board[i][j] = '.';
+                            }
+                        }
+                        num++;
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isValid(int row, int col, char[][] board, char c) {
+        for (int i = 0; i < 9; i++) {
+            if (board[row][i] == c || board[i][col] == c) {
+                return false;
+            }
+        }
+        row = row / 3 * 3;
+        col = col / 3 * 3;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[row + i][col + j] == c) {
+                    return false;
+                }
+            }
+
+        }
+        return true;
+    }
+
+    /*
+     * @description: 41.缺失的第一个正数,算法的时间复杂度应为O(n)，并且只能使用常数级别的额外空间
+     * @param: nums数组
+     * @return: 确实的第一个正数
+     */
+    public int firstMissingPositive(int[] nums) {
+        int length = nums.length;
+        for (int i = 1; i <= length; ) {
+            int k = nums[i - 1];
+            //n个数组最大范围[1,n]超出范围的都设置为-1
+            if (k <= 0 || k > nums.length) {
+                nums[i - 1] = -1;
+                i++;
+            } else {
+                //nums[i]=k,就把这个值放到数组到数组到第k个位置,即num[k-1]=k
+                if (nums[k - 1] != k) {
+                    swap(nums, i - 1, k - 1);
+                } else {
+                    i++;
+                }
+            }
+        }
+        int result;
+        for (result = 1; result <= length; result++) {
+            if (nums[result - 1] != result)
+                break;
+        }
+        return result;
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int temp;
+        temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
+    }
+
+    /*
+     * @description: 46.全排列
+     * @param: nums数组,数字不重复
+     * @return: 数组内数字的所有排列组合
+     */
+    public List<List<Integer>> permute(int[] nums) {
+        int len = nums.length;
+        List<List<Integer>> result = new ArrayList<>();
+        if (len == 0) {
+            return result;
+        }
+        boolean[] used = new boolean[len];
+        Deque<Integer> path = new ArrayDeque<>(len);
+        dfs(nums, len, 0, path, used, result);
+        return result;
+    }
+
+    private void dfs(int[] nums, int len, int depth,
+                     Deque<Integer> path, boolean[] used,
+                     List<List<Integer>> res) {
+        if (depth == len) {
+            List<Integer> list = new ArrayList<>(path);
+            if (!res.contains(list))
+                res.add(list);
+            return;
+        }
+        for (int i = 0; i < len; i++) {
+            if (!used[i]) {
+                path.addLast(nums[i]);
+                used[i] = true;
+                dfs(nums, len, depth + 1, path, used, res);
+                used[i] = false;
+                path.removeLast();
+            }
+        }
+    }
+
+    /*
+     * @description: 47.全排列
+     * @param: nums数组,数字会重复
+     * @return: 数组内数字的所有排列组合
+     */
+    public List<List<Integer>> permuteUnique(int[] nums) {
+        int len = nums.length;
+        List<List<Integer>> result = new ArrayList<>();
+        if (len == 0) {
+            return result;
+        }
+        boolean[] used = new boolean[len];
+        Deque<Integer> path = new ArrayDeque<>(len);
+        dfs(nums, len, 0, path, used, result);
+        return result;
+    }
+
+    /*
+     * @description: 50.Pow(x, n)
+     * @param: x底数, n指数
+     * @return: x的n次方
+     */
+    public double myPow(double x, int n) {
+        //防止Integer.MIN_VALUE溢出
+        long N = n;
+        return N > 0 ? pow(x, N) : 1 / pow(x, -N);
+    }
+
+    private double pow(double x, long n) {
+        double result = 1.0;
+        while (n > 0) {
+            if ((n & 1) == 1) {
+                result = result * x;
+            }
+            x = x * x;
+            n = n >> 1;
+        }
+        return result;
+    }
+
+    /*
+     * @description: 60.第k个排列
+     * @param: n集合[1,2,3,…,n],k第k个排列
+     * @return: 从小到大的第k个排列
+     * @author: cp
+     * @date: 2020/9/5
+     */
+    public String getPermutation(int n, int k) {
+        List<String> number = new ArrayList<>(n);
+        for (int i = 1; i <= n; i++) {
+            number.add(String.valueOf(i));
+        }
+        return getPermutation(number, n, k);
+    }
+
+    private String getPermutation(List<String> number, int n, int k) {
+        if (n == 1) {
+            return number.get(0);
+        }
+        int group = factorial(n - 1);
+        int index = (k - 1) / group;
+        String num = number.get(index);
+        number.remove(index);
+        k = k % group;
+        k = k == 0 ? group : k;
+        return num + getPermutation(number, n - 1, k);
+    }
+
+    private int factorial(int n) {
+        if (n <= 1)
+            return 1;
+        return n * factorial(n - 1);
+    }
+
+    /*
+     * @description: 61.旋转链表,将链表向右移动
+     * @param: head链表头,k移动步数
+     * @return: 旋转后的链表
+     */
+    public ListNode rotateRight(ListNode head, int k) {
+        //无需处理的情况,直接返回
+        if (head == null || k == 0) {
+            return head;
+        }
+        int length = 0;
+        ListNode tmpHead = head;
+        ListNode end = null;
+        while (tmpHead != null) {
+            length++;
+            end = tmpHead;
+            tmpHead = tmpHead.next;
+        }
+        k = k % length;
+        //旋转后的链表和原来一模一样
+        if (k == 0) {
+            return head;
+        }
+        ListNode newHead = head;
+        ListNode newEnd = head;
+        for (int i = 0; i < length - k; i++) {
+            newEnd = newHead;
+            newHead = newHead.next;
+        }
+        newEnd.next = null;
+        end.next = head;
+        return newHead;
+    }
+
+    /*
+     * @description: 62.不同路径
+     * @param: m,n m*n的表格
+     * @return: 从表格左上角到右下角的所有路径
+     */
+    public int uniquePaths(int m, int n) {
+        int[][] dp = new int[m][n];
+        if (m == 1 || n == 1) {
+            return 1;
+        }
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i == 0 && j == 0)
+                    dp[i][j] = 0;
+                else if (i == 0 || j == 0) {
+                    dp[i][j] = 1;
+                } else {
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+                }
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+
+    /*
+     * @description: 74.搜索二维矩阵
+     * @param: matrix二维矩阵,target目标值
+     * @return: true存在,false不存在
+     */
+    public boolean searchMatrix(int[][] matrix, int target) {
+        int row = matrix.length;
+        if (row == 0) {
+            return false;
+        }
+        int col = matrix[0].length;
+        if (col == 0) {
+            return false;
+        }
+        int l = 0;
+        int h = row * col - 1;
+        while (l <= h) {
+            int mid = l + ((h - l) >> 1);
+            int midInt = matrix[mid / col][mid % col];
+            if (midInt == target)
+                return true;
+            else if (midInt < target)
+                l = mid + 1;
+            else if (midInt > target)
+                h = mid - 1;
+        }
+        return false;
+    }
+
+    /*
+     * @description: 82.删除排序链表中的重复元素,保留一个重复元素
+     * @param: head链表
+     * @return: 删除重复元素后的链表
+     */
+    public ListNode deleteDuplicates(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode newHead = new ListNode(head.val);
+        ListNode cursor = newHead;
+        int val = head.val;
+        head = head.next;
+        while (head != null) {
+            if (head.val != val) {
+                ListNode node = new ListNode(head.val);
+                cursor.next = node;
+                cursor = node;
+            }
+            head = head.next;
+            val = head.val;
+        }
+        return newHead;
+    }
+
+    /*
+     * @description: 83.删除排序链表中的重复元素,不保留重复元素
+     * @param: head链表
+     * @return: 删除重复元素后的链表
+     */
+    public ListNode deleteDuplicates83(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode newHead = new ListNode(0);
+        ListNode cursor = newHead;
+        //上个元素
+        int val = head.val;
+        //上个元素是否只出现过一次
+        boolean isFirst = true;
+        head = head.next;
+        while (head != null) {
+            if (head.val == val) {
+                isFirst = false;
+            } else {
+                //上个元素只过出现一次
+                if (isFirst) {
+                    ListNode node = new ListNode(val);
+                    cursor.next = node;
+                    cursor = node;
+                }
+                //修改上个元素的值为当前结点的值
+                val = head.val;
+                isFirst = true;
+                if (head.next == null) {
+                    ListNode node = new ListNode(val);
+                    cursor.next = node;
+                }
+            }
+            head = head.next;
+        }
+        return newHead.next;
+    }
+
+    /*
+     * @description: 86.分隔链表 给定一个链表和一个特定值 x，对链表进行分隔，使得所有小于 x 的节点都在大于或等于 x 的节点之前。
+     * @param: head链表,x特定值
+     * @return: 分割后的链表
+     */
+    public ListNode partition(ListNode head, int x) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode lessNode = new ListNode(0);
+        ListNode lessCursor = lessNode;
+        ListNode greaterNode = new ListNode(0);
+        ListNode greaterCursor = greaterNode;
+        while (head != null) {
+            ListNode node = new ListNode(head.val);
+            if (head.val < x) {
+                lessCursor.next = node;
+                lessCursor = node;
+            } else {
+                greaterCursor.next = node;
+                greaterCursor = node;
+            }
+            head = head.next;
+        }
+        lessCursor.next = greaterNode.next;
+        return lessNode.next;
+    }
+
+    /*
+     * @description: 92.反转链表II
+     * @param: head链表 m,n反转范围
+     * @return: 反转后的链表
+     */
+    public ListNode reverseBetween(ListNode head, int m, int n) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+        if (m == n) {
+            return head;
+        }
+        ListNode newHead = new ListNode(0);
+        newHead.next = head;
+        int count = 1;
+        ListNode pre = newHead;
+        //找到反转的起点
+        while (count < m) {
+            count++;
+            pre = pre.next;
+            head = head.next;
+        }
+        ListNode left = pre;
+        ListNode right = head;
+        pre = pre.next;
+        head = head.next;
+        count++;
+        //反转链表
+        while (count < n) {
+            ListNode temp = head.next;
+            head.next = pre;
+            pre = head;
+            head = temp;
+        }
+        //
+        right.next = head.next;
+        head.next = pre;
+        left.next = head;
+        return newHead.next;
+    }
+
+    /*
+     * @description: 94.二叉树的中序遍历
+     * @param: root,二叉树根结点
+     * @return: 中序遍历结果
+     */
+    public List<Integer> inorderTraversal(TreeNode root) {
+        List<Integer> result = new ArrayList();
+        traversal(root, result);
+        return result;
+    }
+
+    private void traversal(TreeNode node, List<Integer> list) {
+        if (node == null)
+            return;
+        traversal(node.left, list);
+        list.add(node.val);
+        traversal(node.right, list);
+    }
+
+    /*
+     * @description: 347.前 K 个高频元素
+     * @param: nums,非空int数组, k个数
+     * @return: 出现次数最多的k个
+     */
+    public int[] topKFrequent(int[] nums, int k) {
+        int[] result = new int[k];
+        //key-num value-count
+        Map<Integer, Integer> countMap = new HashMap<>();
+        //统计出现次数 O(n)
+        for (int num : nums) {
+            countMap.put(num, countMap.getOrDefault(num, 0) + 1);
+        }
+        PriorityQueue<int[]> queue = new PriorityQueue<>(new Comparator<int[]>() {
+            public int compare(int[] m, int[] n) {
+                return m[1] - n[1];
+            }
+        });
+        //O(nlogk)
+        for (Map.Entry<Integer, Integer> entry : countMap.entrySet()) {
+            int num = entry.getKey(), count = entry.getValue();
+            if (queue.size() == k) {
+                if (queue.peek()[1] < count) {
+                    queue.poll();
+                    queue.offer(new int[]{num, count});
+                }
+            } else {
+                queue.offer(new int[]{num, count});
+            }
+        }
+        for (int i = 0; i < k; ++i) {
+            result[i] = queue.poll()[0];
+        }
+        return result;
+    }
+
+    /*
+     * @description: 414.第三大的数
+     * @param: nums数组
+     * @return: 返回第三大的数,不存在返回最大的数
+     */
+    public int thirdMax(int[] nums) {
+        long max = Long.MIN_VALUE;
+        long second = Long.MIN_VALUE;
+        long third = Long.MIN_VALUE;
+        for (int i = 0, length = nums.length; i < length; i++) {
+            int num = nums[i];
+            if (num > max) {
+                third = second;
+                second = max;
+                max = num;
+                continue;
+            }
+            if (num > second && num < max) {
+                third = second;
+                second = num;
+                continue;
+            }
+            if (num > third && num < second) {
+                third = num;
+                continue;
+            }
+        }
+        return third == Long.MIN_VALUE ? (int) max : (int) third;
+    }
+
+    /*
+     * @description: 448.找到所有数组中消失的数字
+     * @param: nums数组范围为1-n
+     * @return: 找出1-n中消失的数字
+     */
+    public List<Integer> findDisappearedNumbers(int[] nums) {
+        int n = nums.length;
+        for (int i = 0; i < n; ) {
+            int currentNum = nums[i];
+            if (currentNum <= 0 || currentNum > n) {
+                nums[i] = -1;
+                i++;
+                continue;
+            }
+            if (currentNum != (i + 1)) {
+                if (nums[currentNum - 1] == currentNum) {
+                    nums[i] = -1;
+                    i++;
+                } else {
+                    int temp = nums[currentNum - 1];
+                    nums[currentNum - 1] = nums[i];
+                    nums[i] = temp;
+                }
+            } else {
+                i++;
+            }
+        }
+        List<Integer> result = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            if (nums[i] == -1) {
+                result.add(i + 1);
+            }
+        }
+        return result;
+    }
+
+    /*
+     * @description: 485.最大连续1的个数
+     * @param: nums数组,仅包含0和1
+     * @return: 最大连续1的个数
+     */
+    public int findMaxConsecutiveOnes(int[] nums) {
+        int result = 0;
+        int count = 0;
+        for (int i = 0, length = nums.length; i < length; i++) {
+            if (nums[i] == 1) {
+                count++;
+            } else {
+                result = Math.max(result, count);
+                count = 0;
+            }
+        }
+        result = Math.max(result, count);
+        return result;
+    }
+
+    /*
+     * @description: 495.提莫攻击
+     * @param: timeSeries数组表示攻击时间,duration中毒持续间隔
+     * @return: 中毒时间总和
+     */
+    public int findPoisonedDuration(int[] timeSeries, int duration) {
+        int length = timeSeries.length;
+        if (length == 0) {
+            return 0;
+        }
+        if (length == 1) {
+            return duration;
+        }
+        int result = 0;
+        for (int i = 1; i < length; i++) {
+            int time = timeSeries[i] - timeSeries[i - 1];
+            if (time >= duration) {
+                result += duration;
+            } else {
+                result += time;
+            }
+        }
+        //最后一个时间再加上duration
+        result += duration;
+        return result;
+    }
+
+    /*
+     * @description: 628.三个数的最大乘积
+     * @param: nums数组
+     * @return: 三个数最大乘积
+     */
+    public int maximumProduct(int[] nums) {
+        Arrays.sort(nums);
+        int n = nums.length;
+        return Math.max(nums[0] * nums[1] * nums[n - 1], nums[n - 3] * nums[n - 2] * nums[n - 1]);
+    }
+
+    /*
+     * @description: 645.错误的集合
+     * @param: nums数据从1-n
+     * @return: 找出数组中重复和缺失的数字
+     */
+    public int[] findErrorNums(int[] nums) {
+        int n = nums.length;
+        boolean[] exist = new boolean[n + 1];
+        int num = 0;
+        int errorNum = 0;
+        int errorSum = 0;
+        for (int i = 0; i < n; i++) {
+            num = nums[i];
+            errorSum += num;
+            if (exist[num]) {
+                errorNum = num;
+            } else {
+                exist[num] = true;
+            }
+        }
+        int sum = n * (n + 1) / 2;
+        errorSum = errorSum - errorNum;
+        int missNum = sum - errorSum;
+        return new int[]{errorNum, missNum};
     }
 }

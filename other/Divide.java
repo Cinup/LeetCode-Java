@@ -30,8 +30,8 @@ public class Divide {
         dividend -= divisor;
         while (divisor >= dividend) {
             ans = ans + ans;
-            divisor += divisor;
             dividend -= divisor;
+            divisor += divisor;
         }
 
         int a = ans + opposite(divide(originDividend - divisor, originDivisor));
