@@ -3,7 +3,7 @@ package leetcode.other;
 /*
  * @description: 45. 跳跃游戏 II
  * @param: nums,nums[i]表示可跳跃到步数,为非负整数
- * @return: 跳到数组最后一个位置到次数
+ * @return: 跳到数组最后一个位置的次数的最小值
  * @author: cp
  * @date: 2020/9/5
  */

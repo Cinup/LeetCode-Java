@@ -1,4 +1,4 @@
-package leetcode.string;
+package leetcode.dp;
 
 /*
  * @description: 5.最长回文子串

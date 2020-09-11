@@ -77,7 +77,7 @@ class Solution {
 
     /*
      * @description: 4.寻找两个正序数组的中位数,时间复杂度O(log(m + n))
-     * @param: nums1,nums2数组
+     * @param: nums1,nums2 int数组
      * @return: 中位数
      */
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
@@ -156,7 +156,7 @@ class Solution {
     }
 
     /*
-     * @description:  6.Z字形变换,将一个给定字符串根据给定的行数,以从上往下、从左到右进行 Z 字形排列。
+     * @description: 6.Z字形变换,将一个给定字符串根据给定的行数,以从上往下、从左到右进行 Z 字形排列。
      * @param: s字符串,numRows行数
      * @return: Z变换后的字符串
      */
@@ -342,7 +342,7 @@ class Solution {
 
     /*
      * @description: 12.整数转罗马数字
-     * @param: 整数,在 1 到 3999 的范围内
+     * @param: num整数,在 1 到 3999 的范围内
      * @return: 对应的罗马字符
      * 字符          数值
      * 字符          数值
@@ -356,8 +356,11 @@ class Solution {
      */
     public String intToRoman(int num) {
         StringBuilder result = new StringBuilder();
+        //0,100,...,900
         String[] hundreds = new String[]{"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+        //0,10,...,90
         String[] tens = new String[]{"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+        //0,1,...,9
         String[] ones = new String[]{"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
         //千位
         int thousand = num / 1000;
@@ -372,6 +375,42 @@ class Solution {
         int one = num % 10;
         result.append(ones[one]);
         return result.toString();
+    }
+
+    /*
+     * @description: 13.罗马数字转整数
+     * @param: s罗马数字,在 1 到 3999 的范围内
+     * @return: 对应的数字
+     */
+    public int romanToInt(String s) {
+        Map<Character, Integer> romanMap = initMap();
+        int result = 0;
+        int pre = 0;
+        for (int i = s.length() - 1; i >= 0; i--) {
+            int num = romanMap.get(s.charAt(i));
+            if (num >= pre) {
+                result += num;
+            } else {
+                result -= num;
+            }
+            pre = num;
+        }
+        return result;
+    }
+
+    /*
+     * @description: 初始化map
+     */
+    private Map<Character, Integer> initMap() {
+        Map<Character, Integer> romanMap = new HashMap<>();
+        romanMap.put('I', 1);
+        romanMap.put('V', 5);
+        romanMap.put('X', 10);
+        romanMap.put('L', 50);
+        romanMap.put('C', 100);
+        romanMap.put('D', 500);
+        romanMap.put('M', 1000);
+        return romanMap;
     }
 
     /*
@@ -622,6 +661,7 @@ class Solution {
         return result;
     }
 
+    //todo 20 and 21
     /*
      * @description: 22.括号生成
      * @param: n括号对数
@@ -697,7 +737,7 @@ class Solution {
     /*
      * @description: 25.K个一组翻转链表
      * @param: head链表头结点,k数量
-     * @return: 反转后的链表
+     * @return: 翻转后的链表
      */
     public ListNode reverseKGroup(ListNode head, int k) {
         if (head == null || head.next == null || k == 0) {
@@ -719,6 +759,9 @@ class Solution {
         return newHead;
     }
 
+    /*
+     * @description: 翻转链表
+     */
     private ListNode reverse(ListNode head) {
         ListNode newHead = head;
         while (head.next != null) {
@@ -730,6 +773,7 @@ class Solution {
         return newHead;
     }
 
+    //todo 26,27,28
     /*
      * @description: 29.两数相除
      * @param: dividend被除数,divisor除数
@@ -1020,8 +1064,6 @@ class Solution {
      * @description: 36.有效的数独
      * @param: board 9*9的表格
      * @return: true为有效,false无效
-     * @author: cp
-     * @date: 2020/9/5
      */
     public boolean isValidSudoku(char[][] board) {
         Set<String> set = new HashSet<>();
@@ -1091,6 +1133,35 @@ class Solution {
     }
 
     /*
+     * @description: 39.组合总和
+     * @param: candidates 无重复元素int数组, target目标值
+     * @return: candidates中所有元素和为target的组合,元素可以重复使用
+     */
+    public List<List<Integer>> combinationSum(int[] candidates, int target) {
+        List<List<Integer>> result = new ArrayList<>();
+        Deque<Integer> path = new ArrayDeque<>();
+        combinationSum(candidates, target, 0, path, result);
+        return result;
+    }
+
+    private void combinationSum(int[] nums, int target, int start, Deque<Integer> path, List<List<Integer>> res) {
+        if (target == 0) {
+            List<Integer> list = new ArrayList<>(path);
+            res.add(list);
+            return;
+        }
+        if (target > 0) {
+            for (int i = start, length = nums.length; i < length; i++) {
+                if (nums[i] <= target) {
+                    path.addLast(nums[i]);
+                    combinationSum(nums, target - nums[i], i, path, res);
+                    path.removeLast();
+                }
+            }
+        }
+    }
+
+    /*
      * @description: 41.缺失的第一个正数,算法的时间复杂度应为O(n)，并且只能使用常数级别的额外空间
      * @param: nums数组
      * @return: 确实的第一个正数
@@ -1127,6 +1198,108 @@ class Solution {
         nums[j] = temp;
     }
 
+    /*
+     * @description: 43.字符串相乘
+     * @param: num1, num2 非负整数
+     * @return: num1*num2的字符串结果
+     */
+    public String multiply(String num1, String num2) {
+        String result = "0";
+        //num1是0的情况
+        if (num1.equals("0")) {
+            return result;
+        }
+        int n = num2.length() - 1;
+        //num1乘上num2的每一位
+        for (int i = n; i >= 0; i--) {
+            result = add(multiply(num1, num2.charAt(i), n - i), result);
+            System.out.println(result);
+        }
+        return result;
+    }
+
+    /*
+     * @description: 多位数乘一位数,
+     * @param: num1多位数,num2一位数,depth num2的位数,即后面有几个零,需要添加到结果后面
+     */
+    private String multiply(String num1, char num2, int depth) {
+        if (num2 == '0') {
+            return "0";
+        }
+        int carry = 0;
+        int size = num1.length() + 1 + depth;
+        StringBuilder result = new StringBuilder();
+        for (int i = num1.length() - 1; i >= 0; i--) {
+            int num = multiply(num1.charAt(i), num2) + carry;
+            carry = num / 10;
+            num = num % 10;
+            result.append(num);
+        }
+        result.append(carry);
+        result.reverse();
+        char[] zero = new char[depth];
+        Arrays.fill(zero, '0');
+        result.append(zero);
+        if (carry == 0) {
+            return result.substring(1, size);
+        }
+        return result.toString();
+    }
+
+    /*
+     * @description: 一位数乘一位数
+     */
+    private int multiply(char num1, char num2) {
+        return (num1 - '0') * (num2 - '0');
+    }
+
+    /*
+     * @description: 多位数加多位数
+     */
+    private String add(String num1, String num2) {
+        if (num1.equals("0")) {
+            return num2;
+        }
+        if (num2.equals("0")) {
+            return num1;
+        }
+        StringBuilder result = new StringBuilder(num1.length() + 1);
+        int length = 0;
+        int n1 = num1.length() - 1;
+        int n2 = num2.length() - 1;
+        int carry = 0;
+        while (n2 >= 0) {
+            int num = add(num1.charAt(n1), num2.charAt(n2)) + carry;
+            n1--;
+            n2--;
+            length++;
+            carry = num / 10;
+            num = num % 10;
+            result.append(num);
+        }
+        while (n1 >= 0) {
+            int num = add(num1.charAt(n1), '0') + carry;
+            n1--;
+            length++;
+            carry = num / 10;
+            num = num % 10;
+            result.append(num);
+        }
+        if (carry == 1) {
+            result.append(carry);
+            length++;
+        }
+        return result.reverse().substring(0, length);
+    }
+
+    /*
+     * @description: 一位数加一位数
+     */
+    private int add(char num1, char num2) {
+        return (num1 - '0') + (num2 - '0');
+    }
+
+    //todo 42,44
     /*
      * @description: 46.全排列
      * @param: nums数组,数字不重复
@@ -1205,11 +1378,317 @@ class Solution {
     }
 
     /*
+     * @description: 51.N 皇后
+     * @param: n,n*n的棋盘
+     * @return: 所有皇后排列可能性
+     */
+    public List<List<String>> solveNQueens(int n) {
+        List<List<String>> result = new ArrayList<>();
+        backtrack(new ArrayList<>(), result, n);
+        return result;
+    }
+
+    private void backtrack(List<Integer> current, List<List<String>> result, int n) {
+        if (current.size() == n) {
+            List<String> temp = getResult(current);
+            result.add(temp);
+            return;
+        }
+        for (int col = 0; col < n; col++) {
+            //判断位置是否有效
+            if (isValidPosition(current, col)) {
+                current.add(col);
+                //继续求下一行的位置
+                backtrack(current, result, n);
+                current.remove(current.size() - 1);
+            }
+        }
+    }
+
+    /*
+     * @description: 将皇后位置信息转换成棋盘格式的字符串,空格用'.'表示,皇后用'Q'表示
+     */
+    private List<String> getResult(List<Integer> current) {
+        List<String> temp = new ArrayList<>();
+        int n = current.size();
+        for (int i = 0; i < n; i++) {
+            char[] t = new char[n];
+            Arrays.fill(t, '.');
+            t[current.get(i)] = 'Q';
+            temp.add(new String(t));
+        }
+        return temp;
+    }
+
+    /*
+     * @description: 当前插入位置是否有效,行为current.size,列为col
+     */
+    private boolean isValidPosition(List<Integer> current, int col) {
+        int size = current.size();
+        if (size == 0) {
+            return true;
+        }
+        for (int row = 0; row < size; row++) {
+            int existCol = current.get(row);
+            //当前列是否放置过
+            if (existCol == col) {
+                return false;
+            }
+            if (Math.abs(size - row) == Math.abs(col - current.get(row))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*
+     * @description: 52.N皇后II
+     * @param: n,n*n的棋盘
+     * @return: 所有皇后排列可能性数量
+     */
+    public int totalNQueens(int n) {
+        return backtrack(new ArrayList<>(), n, 0);
+    }
+
+    private int backtrack(List<Integer> current, int n, int count) {
+        if (current.size() == n) {
+            count++;
+        } else {
+            for (int col = 0; col < n; col++) {
+                //判断位置是否有效
+                if (isValidPosition(current, col)) {
+                    current.add(col);
+                    //继续求下一行的位置
+                    count = backtrack(current, n, count);
+                    current.remove(current.size() - 1);
+                }
+            }
+        }
+        return count;
+    }
+
+    /*
+     * @description: 53.最大子序和
+     * @param: nums int数组
+     * @return: 最大子序列的和
+     */
+    public int maxSubArray(int[] nums) {
+        int n = nums.length;
+        int sum = 0;
+        int maxSum = 0;
+        //存在nums都是负数的情况,这时候需要返回最大值
+        boolean flag = false;
+        int max = Integer.MIN_VALUE;
+        for (int i = 0; i < n; i++) {
+            max = Math.max(max, nums[i]);
+            if (nums[i] > 0) {
+                flag = true;
+                sum += nums[i];
+                maxSum = Math.max(maxSum, sum);
+            } else {
+                if ((sum + nums[i]) < 0) {
+                    sum = 0;
+                } else {
+                    sum += nums[i];
+                }
+            }
+        }
+        return flag ? maxSum : max;
+    }
+
+    /*
+     * @description: 54.螺旋矩阵
+     * @param: matrix二维int数组
+     * @return: 螺旋输出
+     */
+    public List<Integer> spiralOrder(int[][] matrix) {
+        List<Integer> result = new ArrayList<>();
+        int m = matrix.length;
+        if (m == 0) {
+            return result;
+        }
+        int n = matrix[0].length;
+        int size = m * n;
+        int i = 0, j = 0;
+        //定义方向 右j++,下i++,左j--,上i--
+        int dir = 0;
+        int up = 0, down = m - 1, left = 0, right = n - 1;
+        while (size > 0) {
+            size--;
+            result.add(matrix[i][j]);
+            switch (dir) {
+                case 0:
+                    if (j == right) {
+                        //上限降低
+                        up++;
+                        //改变方向
+                        dir = (dir + 1) % 4;
+                        //向下
+                        i++;
+                    } else {
+                        //继续向右
+                        j++;
+                    }
+                    break;
+                case 1:
+                    if (i == down) {
+                        right--;
+                        dir = (dir + 1) % 4;
+                        j--;
+                    } else {
+                        i++;
+                    }
+                    break;
+                case 2:
+                    if (j == left) {
+                        down--;
+                        dir = (dir + 1) % 4;
+                        i--;
+                    } else {
+                        j--;
+                    }
+                    break;
+                case 3:
+                    if (i == up) {
+                        left++;
+                        dir = (dir + 1) % 4;
+                        j++;
+                    } else {
+                        i--;
+                    }
+                    break;
+            }
+        }
+        return result;
+    }
+
+    /*
+     * @description: 55.跳跃游戏
+     * @param: nums int数组,非负整数,表示当前位置能向后跳的步数
+     * @return: true能跳到最后一个位置,false不能跳到最后一个位置
+     */
+    public boolean canJump(int[] nums) {
+        int n = nums.length;
+        boolean[] arrival = new boolean[n];
+        arrival[0] = true;
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (arrival[j] && (j + nums[j]) >= i) {
+                    arrival[i] = true;
+                    break;
+                }
+            }
+        }
+        return arrival[n - 1];
+    }
+
+    /*
+     * @description: 56.合并区间
+     * @param: intervals n*2数组
+     * @return: 合并重叠的区间
+     */
+    public int[][] merge(int[][] intervals) {
+        int n = intervals.length;
+        List<int[]> list = new ArrayList<>();
+        if (n == 0) {
+            return new int[][]{};
+        }
+        //排序,起点从小到大排列,起点相同时按终点从小打到大排列
+        Arrays.sort(intervals, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] o1, int[] o2) {
+                if (o1[0] == o2[0])
+                    return o1[1] - o2[1];
+                return o1[0] - o2[0];
+            }
+        });
+        int start = intervals[0][0], end = intervals[0][1];
+        for (int i = 1; i < n; i++) {
+            //当前区间在[start,end]之间
+            if (intervals[start][1] >= intervals[i][1]) {
+                continue;
+            }
+            //当前区间起点大于起点大于等于start,但是小于等于end,那么和[start,end]有重合,更新end至较大的值
+            if (end >= intervals[i][0]) {
+                end = Math.max(end, intervals[i][1]);
+            } else {
+                //当前区间和[start,end]没有重合时,将{start,end}加入列表,然后更新[start,end]
+                list.add(new int[]{start, end});
+                start = intervals[i][0];
+                end = intervals[i][1];
+            }
+        }
+        list.add(new int[]{start, end});
+        int[][] result = new int[list.size()][2];
+        return list.toArray(result);
+    }
+
+    /*
+     * @description: 59.螺旋矩阵 II
+     * @param: n 正整数
+     * @return: 生产1-n^2螺旋矩阵
+     */
+    public int[][] generateMatrix(int n) {
+        int[][] result = new int[n][n];
+        int size = n * n;
+        int i = 0, j = 0, k = 1;
+        //定义方向 右j++,下i++,左j--,上i--
+        int dir = 0;
+        int up = 0, down = n - 1, left = 0, right = n - 1;
+        while (size > 0) {
+            size--;
+            result[i][j] = k;
+            k++;
+            switch (dir) {
+                case 0:
+                    if (j == right) {
+                        //上限降低
+                        up++;
+                        //改变方向
+                        dir = (dir + 1) % 4;
+                        //向下
+                        i++;
+                    } else {
+                        //继续向右
+                        j++;
+                    }
+                    break;
+                case 1:
+                    if (i == down) {
+                        right--;
+                        dir = (dir + 1) % 4;
+                        j--;
+                    } else {
+                        i++;
+                    }
+                    break;
+                case 2:
+                    if (j == left) {
+                        down--;
+                        dir = (dir + 1) % 4;
+                        i--;
+                    } else {
+                        j--;
+                    }
+                    break;
+                case 3:
+                    if (i == up) {
+                        left++;
+                        dir = (dir + 1) % 4;
+                        j++;
+                    } else {
+                        i--;
+                    }
+                    break;
+            }
+        }
+        return result;
+    }
+
+    /*
      * @description: 60.第k个排列
      * @param: n集合[1,2,3,…,n],k第k个排列
      * @return: 从小到大的第k个排列
-     * @author: cp
-     * @date: 2020/9/5
      */
     public String getPermutation(int n, int k) {
         List<String> number = new ArrayList<>(n);
@@ -1284,9 +1763,9 @@ class Solution {
         }
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
-                if (i == 0 && j == 0)
+                if (i == 0 && j == 0) {
                     dp[i][j] = 0;
-                else if (i == 0 || j == 0) {
+                } else if (i == 0 || j == 0) {
                     dp[i][j] = 1;
                 } else {
                     dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
@@ -1294,6 +1773,133 @@ class Solution {
             }
         }
         return dp[m - 1][n - 1];
+    }
+
+    /*
+     * @description: 63.不同路径II
+     * @param: obstacleGrid 二维int数组,值为0或者1,其中1表示障碍物
+     * @return: 从表格左上角到右下角的所有路径
+     */
+    public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+        int m = obstacleGrid.length;
+        if (m == 0) {
+            return 0;
+        }
+        int n = obstacleGrid[0].length;
+        int[][] dp = new int[m][n];
+        dp[0][0] = 0;
+        //计算第一列
+        for (int i = 0; i < m; i++) {
+            //当存在一个障碍物时,后续路径就不通了,直接全赋值为0
+            if (obstacleGrid[i][0] == 1) {
+                for (int j = i; j < m; j++) {
+                    dp[j][0] = 0;
+                }
+                break;
+            } else {
+                dp[i][0] = 1;
+            }
+        }
+        //计算第一行
+        for (int i = 0; i < n; i++) {
+            //同上
+            if (obstacleGrid[0][i] == 1) {
+                Arrays.fill(dp[0], i, n, 0);
+                break;
+            } else {
+                dp[0][i] = 1;
+            }
+        }
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                if (obstacleGrid[i][j] == 1) {
+                    dp[i][j] = 0;
+                } else {
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+                }
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+
+    /*
+     * @description: 64.最小路径和
+     * @param: grid 二维int数组,表示 m x n 网格
+     * @return: 从grid[0][0]到grid[m-1][n-1]路径上数字最小总和
+     */
+    public int minPathSum(int[][] grid) {
+        int m = grid.length;
+        if (m == 0) {
+            return 0;
+        }
+        int n = grid[0].length;
+        int[][] dp = new int[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i == 0 && j == 0) {
+                    dp[i][j] = grid[0][0];
+                } else if (i == 0) {
+                    dp[i][j] = grid[i][j] + dp[i][j - 1];
+                } else if (j == 0) {
+                    dp[i][j] = grid[i][j] + dp[i - 1][j];
+                } else {
+                    dp[i][j] = grid[i][j] + Math.min(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+
+    /*
+     * @description: 71.简化路径
+     * @param: path Unix风格文件的绝对路径
+     * @return: 规范路径
+     */
+    public String simplifyPath(String path) {
+        String[] dirs = path.split("/");
+        Deque<String> wordList = new ArrayDeque<>(dirs.length);
+        for (String dirName : dirs) {
+            if (dirName.isEmpty() || dirName.equals(".")) {
+                continue;
+            }
+            if (dirName.equals("..")) {
+                if (!wordList.isEmpty())
+                    wordList.removeLast();
+                continue;
+            }
+            wordList.addLast(dirName);
+        }
+        return "/" + String.join("/", wordList);
+    }
+
+    /*
+     * @description: 73.矩阵置零,如果一个元素为0,则将其所在行和列的所有元素都设为0
+     * @param: matrix:二维int数组
+     * @return:
+     */
+    public void setZeroes(int[][] matrix) {
+        int m = matrix.length;
+        if (m == 0) {
+            return;
+        }
+        int n = matrix[0].length;
+        boolean[] row = new boolean[m];
+        boolean[] col = new boolean[n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == 0) {
+                    row[i] = true;
+                    col[j] = true;
+                }
+            }
+        }
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (row[i] || col[j]) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
     }
 
     /*
@@ -1322,6 +1928,190 @@ class Solution {
             else if (midInt > target)
                 h = mid - 1;
         }
+        return false;
+    }
+
+    /*
+     * @description: 75.颜色分类
+     * @param: nums:仅包含0,1,2的数组
+     * @return: 排序
+     */
+    public void sortColors(int[] nums) {
+        int l = 0, r = nums.length - 1;
+        for (int i = 0; i <= r; i++) {
+            if (nums[i] == 0) {
+                int temp = nums[l];
+                nums[l] = nums[i];
+                nums[i] = temp;
+                l++;
+            } else if (nums[i] == 2) {
+                int temp = nums[r];
+                nums[r] = nums[i];
+                nums[i] = temp;
+                r--;
+                i--;
+            }
+        }
+    }
+
+    /*
+     * @description: 76.最小覆盖子串
+     * @param: s,t:字符串
+     * @return: s中包含t中所有字符的最小字符串,不存在是返回空字符串""
+     */
+    public String minWindow(String s, String t) {
+        if (s.length() < t.length()) {
+            return "";
+        }
+        int[] countMap = new int[128];
+        int count = t.length();
+        for (int i = 0; i < count; i++) {
+            countMap[t.charAt(i)]++;
+        }
+        int indexL = 0, indexR = 0;
+        int left = 0, right = -1;
+        int minLength = Integer.MAX_VALUE;
+        while (indexR < s.length()) {
+            char rightChar = s.charAt(indexR);
+            //这一步很重要,在下面会用到
+            countMap[rightChar]--;
+            //如果当前字符在t中
+            if (countMap[rightChar] >= 0) {
+                count--;
+            }
+            //
+            while (count == 0) {
+                int length = indexR - indexL + 1;
+                if (length < minLength) {
+                    left = indexL;
+                    right = indexR;
+                    minLength = length;
+                }
+                char leftChar = s.charAt(indexL);
+                indexL++;
+                countMap[leftChar]++;
+                //t中字符最终都会是0,而其他字符都是小于0,所以可以判断是否大于0来判断左边的字符是不是在t中
+                if (countMap[leftChar] > 0) {
+                    count++;
+                    break;
+                }
+            }
+            indexR++;
+        }
+        return s.substring(left, right + 1);
+    }
+
+    /*
+     * @description: 77.组合
+     * @param: n 范围1-n, k 数量
+     * @return: 1-n中选取k个的所有组合
+     */
+    public List<List<Integer>> combine(int n, int k) {
+        List<List<Integer>> result = new ArrayList<>();
+        combine(n, k, 1, new ArrayList<>(), result);
+        return result;
+    }
+
+    /*
+     * @param: n范围1-n,k选取数量,start起始数字,current当前已经选中数字,result结果集
+     */
+    private void combine(int n, int k, int start, List<Integer> current, List<List<Integer>> dp) {
+        if (current.size() == k) {
+            List<Integer> temp = new ArrayList<>(current);
+            dp.add(temp);
+        } else {
+            //i <= n - k + current.size() + 1 进行剪枝
+            //即[start,n]元素个数已经小于k-current.size(),不可能再从中凑出到k个元素了
+            // n - start + 1 < k - current.size() --> start > n - k+current.size() + 1
+            for (int i = start; i <= n - k + current.size() + 1; i++) {
+                if (!current.contains(i)) {
+                    current.add(i);
+                    combine(n, k, i + 1, current, dp);
+                    current.remove(current.size() - 1);
+                }
+            }
+        }
+    }
+
+    /*
+     * @description: 78.子集
+     * @param: nums:不含重复元素的整数数组
+     * @return: 所有可能的子集
+     */
+    public List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        //问题分解为77题从n个不重复数中取k个,k从0～n遍历即可
+        for (int i = 0, l = nums.length; i <= nums.length; i++) {
+            List<List<Integer>> currentResult = new ArrayList<>();
+            subsets(nums, i, 0, new ArrayDeque(), currentResult);
+            result.addAll(currentResult);
+        }
+        return result;
+    }
+
+    /*
+     * @description:从nums中选取n个
+     */
+    private void subsets(int[] nums, int n, int start, Deque current, List<List<Integer>> currentResult) {
+        if (current.size() == n) {
+            currentResult.add(new ArrayList<>(current));
+            return;
+        }
+        for (int i = start, l = nums.length; i < l; i++) {
+            current.addLast(nums[i]);
+            subsets(nums, n, i + 1, current, currentResult);
+            current.removeLast();
+        }
+    }
+
+    /*
+     * @description: 79.单词搜索
+     * @param: board二维字符数组, word:字符串
+     * @return: board中是否包含word中所有的字符
+     */
+    public boolean exist(char[][] board, String word) {
+        int m = board.length;
+        if (m == 0) {
+            return word.isEmpty();
+        }
+        int n = board[0].length;
+        boolean[][] visited = new boolean[m][n];
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (exist(board, i, j, word, 0))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean exist(char[][] board, int row, int col, String word, int index) {
+        //超出board范围
+        if (row < 0 || row > board.length - 1 || col < 0 || col > board[0].length - 1) {
+            return false;
+        }
+        //访问过
+        if (board[row][col] == '*') {
+            return false;
+        }
+        //字符不等
+        if (board[row][col] != word.charAt(index)) {
+            return false;
+        }
+        index++;
+        //长度相等已经相等
+        if (index == word.length()) {
+            return true;
+        }
+        char c = board[row][col];
+        board[row][col] = '*';
+        if (exist(board, row + 1, col, word, index) ||
+                exist(board, row, col + 1, word, index) ||
+                exist(board, row - 1, col, word, index) ||
+                exist(board, row, col - 1, word, index)) {
+            return true;
+        }
+        board[row][col] = c;
         return false;
     }
 
@@ -1475,6 +2265,37 @@ class Solution {
         traversal(node.left, list);
         list.add(node.val);
         traversal(node.right, list);
+    }
+
+    /*
+     * @description: 98.验证二叉搜索树
+     * @param: 二叉树根结点
+     * @return: true有效二叉搜索树,false无效二叉搜索树
+     * 节点的左子树只包含小于当前节点的数。
+     * 节点的右子树只包含大于当前节点的数。
+     * 所有左子树和右子树自身必须也是二叉搜索树。
+     */
+    public boolean isValidBST(TreeNode root) {
+        if (root == null)
+            return true;
+        List<Integer> list = new ArrayList<>();
+        //有效二叉树中序遍历应该是递增的
+        traversalList(root, list);
+        //判断是否递增即可
+        for (int i = 0, l = list.size(); i < l - 1; i++) {
+            if (list.get(i + 1) <= list.get(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void traversalList(TreeNode node, List<Integer> list) {
+        if (node == null)
+            return;
+        traversalList(node.left, list);
+        list.add(node.val);
+        traversalList(node.right, list);
     }
 
     /*
@@ -1645,7 +2466,7 @@ class Solution {
     public int[] findErrorNums(int[] nums) {
         int n = nums.length;
         boolean[] exist = new boolean[n + 1];
-        int num = 0;
+        int num;
         int errorNum = 0;
         int errorSum = 0;
         for (int i = 0; i < n; i++) {
