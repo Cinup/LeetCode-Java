@@ -2,6 +2,7 @@ package leetcode;
 
 import leetcode.entity.Entry;
 import leetcode.entity.ListNode;
+import leetcode.entity.Node;
 import leetcode.entity.TreeNode;
 
 import java.util.*;
@@ -773,7 +774,27 @@ class Solution {
         return newHead;
     }
 
-    //todo 26,27,28
+    //todo 26,28
+    /*
+     * @description: 27. 移除元素
+     * @param: nums:数组, val:需要移除的元素
+     * @return: int: 移除val元素后的数组长度
+     */
+    public int removeElement(int[] nums, int val) {
+        int index = 0;
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] != val) {
+                if (i != index) {
+                    int temp = nums[index];
+                    nums[index] = nums[i];
+                    nums[i] = temp;
+                }
+                index++;
+            }
+        }
+        return index;
+    }
+
     /*
      * @description: 29.两数相除
      * @param: dividend被除数,divisor除数
@@ -954,7 +975,7 @@ class Solution {
 
     /*
      * @description: 33.搜索旋转排序数组,[0,1,2,4,5,6,7]-->[4,5,6,7,0,1,2]
-     * @param: nums数组,target目标值
+     * @param: nums数组不包含重复元素,target目标值
      * @return: target在数组中的下标,返回-1表示target不存在
      * @date: 2020/9/2
      */
@@ -964,7 +985,6 @@ class Solution {
         if (nums.length == 1)
             return nums[0] == target ? 0 : -1;
         int l = 0, r = nums.length - 1;
-        int n = r;
         while (l <= r) {
             int mid = (l + r) / 2;
             if (nums[mid] == target)
@@ -972,7 +992,7 @@ class Solution {
             //[l,mid]有序
             // l        mid      r
             //[4, 5, 6, 7, 1, 2, 3]中找5
-            if (nums[l] <= nums[mid]) {
+            if (nums[l] < nums[mid]) {
                 //target范围在[[nums[l],nums[mid])之间,范围缩小到[l,mid-1]
                 if (target >= nums[l] && target < nums[mid])
                     r = mid - 1;
@@ -984,7 +1004,7 @@ class Solution {
                 // l        mid      r
                 //[5, 6, 7, 1, 2, 3, 4]
                 //target范围在([nums[mid],nums[n]]之间,范围缩小到(mid+1,r]
-                if (target > nums[mid] && target <= nums[n])
+                if (target > nums[mid] && target <= nums[r])
                     l = mid + 1;
                     //否则范围为[l,mid-1]
                 else
@@ -1081,11 +1101,12 @@ class Solution {
 
     /*
      * @description: 37.解数独
-     * @param: board 9*9的表格
-     * @return:
+     * @param: board:9*9的表格
+     * @return: void
      */
     public void solveSudoku(char[][] board) {
-        solver(board);
+//        solver(board);
+        solver(board, 1);
     }
 
     private boolean solver(char[][] board) {
@@ -1107,6 +1128,37 @@ class Solution {
                         num++;
                     }
                     return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /*
+     * @description: 通过count来记录已经填过的格子数量,减少遍历的次数。
+     */
+    private boolean solver(char[][] board, int count) {
+        for (int i = (count - 1) / 9; i < 9; i++) {
+            for (int j = (count - 1) % 9; j < 9; j++) {
+                if (board[i][j] == '.') {
+                    //从1尝试到9
+                    char num = '1';
+                    while (num <= '9') {
+                        //当前数字是否已经被填过了
+                        if (isValid(i, j, board, num)) {
+                            board[i][j] = num;
+                            if (solver(board, ++count)) {
+                                return true;
+                            } else {
+                                board[i][j] = '.';
+                                count--;
+                            }
+                        }
+                        num++;
+                    }
+                    return false;
+                } else {
+                    count++;
                 }
             }
         }
@@ -1384,11 +1436,11 @@ class Solution {
      */
     public List<List<String>> solveNQueens(int n) {
         List<List<String>> result = new ArrayList<>();
-        backtrack(new ArrayList<>(), result, n);
+        solveNQueens(n, new ArrayList<>(), result);
         return result;
     }
 
-    private void backtrack(List<Integer> current, List<List<String>> result, int n) {
+    private void solveNQueens(int n, List<Integer> current, List<List<String>> result) {
         if (current.size() == n) {
             List<String> temp = getResult(current);
             result.add(temp);
@@ -1399,7 +1451,7 @@ class Solution {
             if (isValidPosition(current, col)) {
                 current.add(col);
                 //继续求下一行的位置
-                backtrack(current, result, n);
+                solveNQueens(n, current, result);
                 current.remove(current.size() - 1);
             }
         }
@@ -2075,7 +2127,6 @@ class Solution {
             return word.isEmpty();
         }
         int n = board[0].length;
-        boolean[][] visited = new boolean[m][n];
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
                 if (exist(board, i, j, word, 0))
@@ -2112,6 +2163,77 @@ class Solution {
             return true;
         }
         board[row][col] = c;
+        return false;
+    }
+
+    /*
+     * @description: 80.删除排序数组中的重复项II
+     * @param: nums:排序数组
+     * @return: 删除重复元素后的长度,重复元素最多出现2次
+     */
+    public int removeDuplicates(int[] nums) {
+        int n = nums.length;
+        //当数组内元素数量不超过2时,无论如何都是满足条件都
+        if (n <= 2) {
+            return nums.length;
+        }
+        int slow = 1;
+        int fast = 2;
+        for (; fast < n; fast++) {
+            //如果[slow-1]==[fast]
+            //那么在[slow-1,fast]区间内都值都是相等的
+            //[slow-1,slow]就是2个相同的值,所以需要将不同的值放到slow+1位置上
+            if (nums[fast] != nums[slow - 1]) {
+                slow++;
+                nums[slow] = nums[fast];
+            }
+        }
+        return slow + 1;
+    }
+
+    /*
+     * @description: 81.搜索旋转排序数组II
+     * @param: [nums, target]
+     * @return: boolean
+     */
+    public boolean search2(int[] nums, int target) {
+        if (nums.length == 0)
+            return false;
+        if (nums.length == 1)
+            return nums[0] == target;
+        int l = 0, r = nums.length - 1;
+        while (l <= r) {
+            int mid = (l + r) / 2;
+            if (nums[mid] == target)
+                return true;
+            //[l,mid]有序
+            // l        mid      r
+            //[4, 5, 6, 7, 1, 2, 3]中找5
+            if (nums[l] < nums[mid]) {
+                //target范围在[[nums[l],nums[mid])之间,范围缩小到[l,mid-1]
+                if (target >= nums[l] && target < nums[mid])
+                    r = mid - 1;
+                    //否则范围为[mid+1,r]
+                else
+                    l = mid + 1;
+            } else if (nums[l] == nums[mid]) {
+                //由于有重复元素,无法判断,最简单的方法就是将l移除,范围缩小至[l+1,r]再搜索一次
+                // l        mid      r
+                //[1, 2, 3, 1, 0, 0, 1]
+                //    l              r
+                l++;
+            } else {
+                //[mid,r]有序
+                // l        mid      r
+                //[5, 6, 7, 1, 2, 3, 4]
+                //target范围在([nums[mid],nums[r]]之间,范围缩小到[mid+1,r]
+                if (target > nums[mid] && target <= nums[r])
+                    l = mid + 1;
+                    //否则范围为[l,mid-1]
+                else
+                    r = mid - 1;
+            }
+        }
         return false;
     }
 
@@ -2180,6 +2302,42 @@ class Solution {
     }
 
     /*
+     * @description: 84.柱状图中最大的矩形
+     * @param: heights:int数组,表示高度
+     * @return: 最大矩形的面积
+     */
+    public int largestRectangleArea(int[] heights) {
+        int maxArea = 0;
+        //让栈按高度递增,遇到小于栈顶元素的就让栈顶元素出栈
+        Stack<Integer> stack = new Stack<>();
+        int p = 0;
+        while (p < heights.length) {
+            if (stack.isEmpty() || heights[p] >= heights[stack.peek()]) {
+                stack.push(p);
+                p++;
+            } else {
+                //计算栈顶
+                int height = heights[stack.pop()];
+                int left = stack.isEmpty() ? -1 : stack.peek();
+                //当前比栈顶小,但是前一个一定不会比栈顶小,否则当前栈顶肯定已经被出栈了
+                int right = p;
+                int area = (right - left - 1) * height;
+                maxArea = Math.max(area, maxArea);
+
+            }
+        }
+        while (!stack.isEmpty()) {
+            //保存栈顶高度
+            int height = heights[stack.pop()];
+            //左边第一个小于当前柱子的下标
+            int left = stack.isEmpty() ? -1 : stack.peek();
+            int area = (p - left - 1) * height;
+            maxArea = Math.max(area, maxArea);
+        }
+        return maxArea;
+    }
+
+    /*
      * @description: 86.分隔链表 给定一个链表和一个特定值 x，对链表进行分隔，使得所有小于 x 的节点都在大于或等于 x 的节点之前。
      * @param: head链表,x特定值
      * @return: 分割后的链表
@@ -2205,6 +2363,195 @@ class Solution {
         }
         lessCursor.next = greaterNode.next;
         return lessNode.next;
+    }
+
+    /*
+     * @description: 87.扰乱字符串
+     * @param: s1,s2:字符串
+     * @return: boolean
+     */
+    public boolean isScramble(String s1, String s2) {
+        //判断null
+        if (s1 == null) {
+            return s2 == null;
+        }
+        if (s2 == null) {
+            return s1 == null;
+        }
+        //判断长度
+        if (s1.length() != s2.length()) {
+            return false;
+        }
+        //判断s1和s2是不是相等
+        if (s1.equals(s2)) {
+            return true;
+        }
+        //判断s1和s2是否是相同字符组成
+        if (!isEqualChar(s1, s2)) {
+            return false;
+        }
+        for (int i = 1, l = s1.length(); i < l; i++) {
+            //s1  a - b
+            //s2 a - b
+            //  0-i i-l
+            if (isScramble(s1.substring(0, i), s2.substring(0, i)) && isScramble(s1.substring(i), s2.substring(i))) {
+                return true;
+            }
+            //s1 a - b
+            //   0-i i-l
+            //s2 b - a
+            //   0-i i-l
+            if (isScramble(s1.substring(0, i), s2.substring(l - i)) && isScramble(s1.substring(i), s2.substring(0, l - i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+     * @description: 判断字符串是否由相同的字符组成
+     */
+    private boolean isEqualChar(String s1, String s2) {
+        int[] letters = new int[26];
+        for (int i = 0, l = s1.length(); i < l; i++) {
+            letters[s1.charAt(i) - 'a']++;
+            letters[s2.charAt(i) - 'a']--;
+        }
+        for (int i = 0; i < 26; i++) {
+            if (letters[i] != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*
+     * @description: 89.格雷编码
+     * @param: n:位数[0,2^n-1]
+     * @return: 格雷编码,两个连续的数值仅有一个bit位数的差异
+     */
+    //todo 时间复杂度太高了
+    public List<Integer> grayCode(int n) {
+        int num = 1 << n;
+        List<Integer> result = new ArrayList<>();
+        boolean[] visited = new boolean[num];
+        grayCode(num, visited, new ArrayList<>(), result);
+        return result;
+    }
+
+    private void grayCode(int n, boolean[] visited, List<Integer> current, List<Integer> result) {
+        if (current.size() == n) {
+            if (validGrayCode(current)) {
+                result.addAll(current);
+                return;
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            if (visited[i])
+                continue;
+            current.add(i);
+            visited[i] = true;
+            grayCode(n, visited, current, result);
+            visited[i] = false;
+            current.remove(current.size() - 1);
+            if (!result.isEmpty()) {
+                break;
+            }
+        }
+    }
+
+    //O(n)
+    private boolean validGrayCode(List<Integer> list) {
+        int size = list.size();
+        if (size == 0)
+            return true;
+        for (int i = 0; i < size - 1; i++) {
+            if (!validGrayCode(list.get(i), list.get(i + 1))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean validGrayCode(int x, int y) {
+        int z = x ^ y;
+        int count = 0;
+        while (z > 0) {
+            count += (z & 1);
+            if (count > 1) {
+                return false;
+            }
+            z = z >> 1;
+        }
+        return true;
+    }
+
+    /*
+     * @description: 90.子集II
+     * @param: nums:包含重复元素的整数数组
+     * @return: 所有可能的子集
+     */
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        Arrays.sort(nums);
+        //类似78题,只需要考虑重复元素
+        for (int i = 0, l = nums.length; i <= nums.length; i++) {
+            List<List<Integer>> currentResult = new ArrayList<>();
+            subsetsWithDup(nums, i, 0, new ArrayDeque(), currentResult);
+            result.addAll(currentResult);
+        }
+        return result;
+    }
+
+    private void subsetsWithDup(int[] nums, int n, int start, Deque current, List<List<Integer>> currentResult) {
+        if (current.size() == n) {
+            currentResult.add(new ArrayList<>(current));
+            return;
+        }
+        for (int i = start, l = nums.length; i < l; i++) {
+            if (i > start && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            current.addLast(nums[i]);
+            subsetsWithDup(nums, n, i + 1, current, currentResult);
+            current.removeLast();
+        }
+    }
+
+    /*
+     * @description: 91.解码方法,将数字1-26映射到大写字母A-Z
+     * @param: s:字符串仅数组
+     * @return: int:将字符串数字映射到字符有多少种方式,例如123可以拆分为1-2-3,1-23或者12-3
+     */
+    public int numDecodings(String s) {
+        HashMap<Integer, Integer> memoization = new HashMap<>();
+        return numDecodings(s, 0, memoization);
+    }
+
+    private int numDecodings(String s, int start, HashMap<Integer, Integer> memoization) {
+        if (start == s.length()) {
+            return 1;
+        }
+        if (s.charAt(start) == '0') {
+            return 0;
+        }
+        //判断之前是否计算过
+        int m = memoization.getOrDefault(start, -1);
+        if (m != -1) {
+            return m;
+        }
+        int ans1 = numDecodings(s, start + 1, memoization);
+        int ans2 = 0;
+        //如果字符串后续还有2位
+        if (start < s.length() - 1) {
+            int num = ((s.charAt(start) - '0') * 10) + s.charAt(start + 1) - '0';
+            if (num <= 26) {
+                ans2 = numDecodings(s, start + 2, memoization);
+            }
+        }
+        //将结果保存
+        memoization.put(start, ans1 + ans2);
+        return ans1 + ans2;
     }
 
     /*
@@ -2249,22 +2596,77 @@ class Solution {
     }
 
     /*
+     * @description: 93.复原IP地址
+     * @param: String:仅包含数字的字符串
+     * @return: List<String>:所有有效的ip地址
+     */
+    public List<String> restoreIpAddresses(String s) {
+        List<String> result = new ArrayList<>();
+        //IP地址的有效长度范围为[4,12]
+        if (s.length() < 4 || s.length() > 12) {
+            return result;
+        }
+        restoreIpAddresses(s, 0, 0, new StringBuilder(), result);
+        return result;
+    }
+
+    public void restoreIpAddresses(String s, int start, int count, StringBuilder current, List<String> result) {
+        //当最后剩余的数字都取三位数还有余的时候,说明前面取少了,提前剪枝
+        if (s.length() - start > 3 * (4 - count)) {
+            return;
+        }
+        if (count == 4) {
+            if (start == s.length()) {
+                result.add(new String(current.delete(current.length() - 1, current.length())));//删除最后一个点
+            }
+            return;
+        }
+        //count没到4
+        if (start == s.length()) {
+            return;
+        }
+        StringBuilder temp = new StringBuilder(current);
+        current.append(s, start, start + 1).append(".");
+        restoreIpAddresses(s, start + 1, count + 1, current, result);
+        //一位数允许0.0.0.0
+        //但是多位数不允许0开头
+        if (s.charAt(start) == '0')
+            return;
+        if (start + 1 < s.length()) {
+            current = new StringBuilder(temp);
+            current.append(s, start, start + 2).append(".");
+            restoreIpAddresses(s, start + 2, count + 1, current, result);
+        }
+        if (start + 2 < s.length()) {
+            //三位数有效数字为[100,255]
+            if (Integer.valueOf(s.substring(start, start + 3)) <= 255) {
+                current = new StringBuilder(temp);
+                current.append(s, start, start + 3).append(".");
+                restoreIpAddresses(s, start + 3, count + 1, current, result);
+            }
+        }
+    }
+
+    /*
      * @description: 94.二叉树的中序遍历
      * @param: root,二叉树根结点
      * @return: 中序遍历结果
      */
     public List<Integer> inorderTraversal(TreeNode root) {
         List<Integer> result = new ArrayList();
-        traversal(root, result);
+        inorderTraversal(root, result);
         return result;
     }
 
-    private void traversal(TreeNode node, List<Integer> list) {
+    /*
+     * @description: 中序遍历
+     */
+    private void inorderTraversal(TreeNode node, List<Integer> list) {
         if (node == null)
             return;
-        traversal(node.left, list);
+        inorderTraversal(node.left, list);
         list.add(node.val);
-        traversal(node.right, list);
+        inorderTraversal(node.right, list);
     }
 
     /*
@@ -2280,7 +2682,7 @@ class Solution {
             return true;
         List<Integer> list = new ArrayList<>();
         //有效二叉树中序遍历应该是递增的
-        traversalList(root, list);
+        inorderTraversal(root, list);
         //判断是否递增即可
         for (int i = 0, l = list.size(); i < l - 1; i++) {
             if (list.get(i + 1) <= list.get(i)) {
@@ -2290,12 +2692,272 @@ class Solution {
         return true;
     }
 
-    private void traversalList(TreeNode node, List<Integer> list) {
+    /*
+     * @description: 102.二叉树的层序遍历
+     * @param: root:二叉树根结点
+     * @return: List<List<Integer>>:二叉树层序遍历结果,其中List<Integer>为相同层结点的值
+     */
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        List<List<Integer>> result = new ArrayList<>();
+        Map<Integer, List<Integer>> depthMap = new HashMap<>();
+        levelOrderTraversal(depthMap, root, 0);
+        for (int i = 0; i < depthMap.size(); i++) {
+            result.add(depthMap.get(i));
+        }
+        return result;
+    }
+
+    /*
+     * @description: 层序遍历
+     */
+    private void levelOrderTraversal(Map<Integer, List<Integer>> map, TreeNode node, int depth) {
         if (node == null)
             return;
-        traversalList(node.left, list);
+        else {
+            if (map.containsKey(depth)) {
+                map.get(depth).add(node.val);
+            } else {
+                List<Integer> list = new ArrayList<>();
+                list.add(node.val);
+                map.put(depth, list);
+            }
+            levelOrderTraversal(map, node.left, depth + 1);
+            levelOrderTraversal(map, node.right, depth + 1);
+        }
+    }
+
+    /*
+     * @description: 103.二叉树的锯齿形层次遍历
+     * @param: root:二叉树根结点
+     * @return: List<List<Integer>>:二叉树层序遍历结果,其中List<Integer>为相同层结点的值,第1层左往右,第2层从右往左以此类推
+     */
+    public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+        List<List<Integer>> result = new ArrayList<>();
+        Map<Integer, List<Integer>> depthMap = new HashMap<>();
+        levelOrderTraversal(depthMap, root, 0);
+        for (int i = 0; i < depthMap.size(); i++) {
+            List<Integer> list = depthMap.get(i);
+            if ((i & 1) == 1)
+                Collections.reverse(list);
+            result.add(depthMap.get(i));
+        }
+        return result;
+    }
+
+    /*
+     * @description: 107.二叉树的层次遍历II
+     * @param: root:二叉树根结点
+     * @return: List<List<Integer>>:二叉树层序遍历自底向上结果,其中List<Integer>为相同层结点的值
+     */
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+        List<List<Integer>> result = new ArrayList<>();
+        Map<Integer, List<Integer>> depthMap = new HashMap<>();
+        levelOrderTraversal(depthMap, root, 0);
+        for (int i = depthMap.size() - 1; i >= 0; i--) {
+            result.add(depthMap.get(i));
+        }
+        return result;
+    }
+
+    /*
+     * @description: 110.平衡二叉树
+     * @param: root:二叉树根结点
+     * @return: boolean:是否为平衡二叉树
+     */
+    public boolean isBalanced(TreeNode root) {
+        return getTreeDepth(root) != -1;
+    }
+
+    private int getTreeDepth(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
+        int leftDepth = getTreeDepth(root.left);
+        if (leftDepth == -1) {
+            return -1;
+        }
+        int rightDepth = getTreeDepth(root.right);
+        if (rightDepth == -1) {
+            return -1;
+        }
+        if (Math.abs(leftDepth - rightDepth) != 1) {
+            return -1;
+        }
+        return Math.max(leftDepth, rightDepth) + 1;
+    }
+
+    /*
+     * @description: 111.二叉树的最小深度
+     * @param: root:二叉树根结点
+     * @return: int:最小深度
+     */
+    public int minDepth(TreeNode root) {
+        return 0;
+    }
+
+    /*
+     * @description: 113.路径总和II
+     * @param: root:二叉树根目录,sum:和
+     * @return: List<List<Integer>>:所有从根节点到叶子节点路径总和等于给定目标和的路径
+     */
+    public List<List<Integer>> pathSum(TreeNode root, int sum) {
+        List<List<Integer>> result = new ArrayList<>();
+        Deque current = new ArrayDeque<>();
+        pathSum(root, sum, current, result);
+        return result;
+    }
+
+    private void pathSum(TreeNode root, int sum, Deque<Integer> current, List<List<Integer>> result) {
+        if (root == null) {
+            return;
+        }
+        //当前是叶子结点
+        current.addLast(root.val);
+        if (root.left == null && root.right == null) {
+            if (sum == root.val) {
+                result.add(new ArrayList<>(current));
+            }
+        }
+        pathSum(root.left, sum - root.val, current, result);
+        pathSum(root.right, sum - root.val, current, result);
+        current.removeLast();
+    }
+
+    /*
+     * @description: 114.二叉树展开为链表,原地将它展开为一个单链表
+     * @param: root:二叉树根结点
+     * @return: void
+     */
+    public void flatten(TreeNode root) {
+        while (root != null) {
+            if (root.left == null) {
+                root = root.right;
+            } else {
+                TreeNode oldRight = root.right;
+                TreeNode newRight = root.left;
+                root.right = newRight;
+                root.left = null;
+                while (newRight.right != null) {
+                    newRight = newRight.right;
+                }
+                newRight.right = oldRight;
+                root = root.right;
+            }
+        }
+    }
+
+    /*
+     * @description: 116.填充每个节点的下一个右侧节点指针
+     * @param: root: 一个完美二叉树根结点
+     * @return: Node:
+     */
+    public Node connect(Node root) {
+        connectNode(root);
+        return root;
+    }
+
+    private void connectNode(Node root) {
+        if (root == null || root.left == null) {
+            return;
+        }
+        //连接当前结点左右孩子结点
+        root.left.next = root.right;
+        root.right.next = (root.next == null) ? null : root.next.left;
+        connect(root.left);
+        connect(root.right);
+    }
+
+    /*
+     * @description: 144.二叉树的前序遍历
+     * @param: root:二叉树根结点
+     * @return: List<Integer>:前序序遍历结果
+     */
+    public List<Integer> preorderTraversal(TreeNode root) {
+        List<Integer> result = new ArrayList();
+        preorderTraversal(root, result);
+        return result;
+    }
+
+    /*
+     * @description: 前序遍历
+     */
+    private void preorderTraversal(TreeNode node, List<Integer> list) {
+        if (node == null)
+            return;
         list.add(node.val);
-        traversalList(node.right, list);
+        preorderTraversal(node.left, list);
+        preorderTraversal(node.right, list);
+    }
+
+    /*
+     * @description: 145.二叉树的后序遍历
+     * @param: root:二叉树根结点
+     * @return: List<Integer>:前序序遍历结果
+     */
+    public List<Integer> postorderTraversal(TreeNode root) {
+        List<Integer> result = new ArrayList();
+        postorderTraversal(root, result);
+        return result;
+    }
+
+    /*
+     * @description: 后序遍历
+     */
+    private void postorderTraversal(TreeNode node, List<Integer> list) {
+        if (node == null)
+            return;
+        postorderTraversal(node.left, list);
+        postorderTraversal(node.right, list);
+        list.add(node.val);
+    }
+
+    /*
+     * @description: 150.逆波兰表达式求值
+     * @param: tokens:表达式
+     * @return: int:逆波兰表达式结果
+     */
+    public int evalRPN(String[] tokens) {
+        Stack<Integer> stack = new Stack<>();
+        for (int i = 0, n = tokens.length; i < n; i++) {
+            String token = tokens[i];
+            if (isOperator(token)) {
+                int num1 = stack.pop();
+                int num2 = stack.pop();
+                stack.push(calculate(num2, num1, token));
+            } else {
+                stack.push(Integer.valueOf(token));
+            }
+        }
+        return stack.pop();
+    }
+
+    /*
+     * @description: 判断字符是否是+ - * /中的一个
+     */
+    private boolean isOperator(String token) {
+        return "+".equals(token) || "-".equals(token) || "*".equals(token) || "/".equals(token);
+    }
+
+    /*
+     * @description: 根据操作符计算a和b的结果
+     */
+    private int calculate(int a, int b, String operator) {
+        int result = 0;
+        switch (operator) {
+            case "+":
+                result = a + b;
+                break;
+            case "-":
+                result = a - b;
+                break;
+            case "*":
+                result = a * b;
+                break;
+            case "/":
+                result = a / b;
+                break;
+        }
+        return result;
     }
 
     /*
@@ -2459,6 +3121,34 @@ class Solution {
     }
 
     /*
+     * @description: 637.二叉树的层平均值
+     * @param: root:二叉树根结点
+     * @return: List<Double>:每层节点平均值
+     */
+    public List<Double> averageOfLevels(TreeNode root) {
+        List<Double> result = new ArrayList<>();
+        Map<Integer, Entry> depthMap = new HashMap<>();
+        averageOfLevels(depthMap, root, 0);
+        for (int i = 0; i < depthMap.size(); i++) {
+            result.add(depthMap.get(i).getAverage());
+        }
+        return result;
+    }
+
+    private void averageOfLevels(Map<Integer, Entry> map, TreeNode node, int depth) {
+        if (node == null)
+            return;
+        else {
+            Entry entry = map.getOrDefault(depth, new Entry(0, 0.0));
+            entry.setCount(entry.getCount() + 1);
+            entry.setSum(entry.getSum() + node.val);
+            map.put(depth, entry);
+            averageOfLevels(map, node.left, depth + 1);
+            averageOfLevels(map, node.right, depth + 1);
+        }
+    }
+
+    /*
      * @description: 645.错误的集合
      * @param: nums数据从1-n
      * @return: 找出数组中重复和缺失的数字
@@ -2482,5 +3172,167 @@ class Solution {
         errorSum = errorSum - errorNum;
         int missNum = sum - errorSum;
         return new int[]{errorNum, missNum};
+    }
+
+    /*
+     * @description: 剑指Offer 35.复杂链表的复制
+     * @param: head:链表头
+     * @return: Node:深拷贝的链表
+     */
+    public Node copyRandomList(Node head) {
+        if (head == null) {
+            return null;
+        }
+        Node copyNode = new Node(head.val);
+        Node cursor = copyNode;
+        Node headCursor = head;
+        Map<Node, Node> nodeMap = new HashMap<>();
+        nodeMap.put(copyNode, head);
+        //首先赋值next
+        while (headCursor.next != null) {
+            headCursor = headCursor.next;
+            cursor.next = new Node(headCursor.val);
+            cursor = cursor.next;
+            nodeMap.put(head, cursor);
+        }
+        headCursor = head;
+        cursor = copyNode;
+        //再复制random
+        while (headCursor != null) {
+            if (headCursor.random == null) {
+                cursor.random = null;
+            } else {
+                cursor.random = nodeMap.get(headCursor.random);
+            }
+            headCursor = headCursor.next;
+            cursor = cursor.next;
+        }
+        return copyNode;
+    }
+
+    /*
+     * @description: 面试题 01.01.判定字符是否唯一
+     * @param: astr:字符串
+     * @return: boolean:字符中是否不包含重复的字符
+     */
+    public boolean isUnique(String astr) {
+        int lowercase = 0;
+        int uppercase = 0;
+        for (int i = 0, l = astr.length(); i < l; i++) {
+            char c = astr.charAt(i);
+            int bit;
+            if (c >= 'a') {
+                bit = 1 << (c - 'a' + 1);
+                if ((bit & lowercase) == bit) {
+                    return false;
+                } else {
+                    lowercase |= bit;
+                }
+            } else {
+                bit = 1 << (c - 'A' + 1);
+                if ((bit & uppercase) == bit) {
+                    return false;
+                } else {
+                    uppercase |= bit;
+                }
+            }
+        }
+        return true;
+    }
+
+    /*
+     * @description: 面试题 01.02.判定是否互为字符重排
+     * @param: s1,s2:字符串
+     * @return: boolean:字符串s1和s2的字符是否完全相同
+     */
+    public boolean CheckPermutation(String s1, String s2) {
+        if (s1 == null) {
+            return s2 == null;
+        }
+        if (s2 == null) {
+            return s1 == null;
+        }
+        if (s1.length() != s2.length()) {
+            return false;
+        }
+        int[] charNum = new int[128];
+        for (int i = 0, l = s1.length(); i < l; i++) {
+            charNum[s1.charAt(i)]++;
+            charNum[s2.charAt(i)]--;
+        }
+        for (int i = 0; i < 128; i++) {
+            if (charNum[i] != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*
+     * @description: 面试题 01.03.URL化
+     * @param: S:字符串,length:字符串真实长度
+     * @return: String:将空格替换为"%20"
+     */
+    public String replaceSpaces(String S, int length) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            char c = S.charAt(i);
+            if (c == ' ') {
+                result.append("%20");
+            } else {
+                result.append(c);
+            }
+        }
+        return result.toString();
+    }
+
+    /*
+     * @description: 面试题 01.04.回文排列
+     * @param: s:字符串
+     * @return: boolean: 字符串的字符是否可以组成回文字符串
+     */
+    public boolean canPermutePalindrome(String s) {
+        int[] charNum = new int[128];
+        for (int i = 0, l = s.length(); i < l; i++) {
+            charNum[s.charAt(i)]++;
+        }
+        int num = 0;
+        for (int i = 0; i < 128; i++) {
+            num += charNum[i] & 1;
+            if (num > 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*
+     * @description: 面试题 01.06.字符串压缩
+     * @param: S:字符仅包含a-z
+     * @return: String:压缩成字符数量的形式,例如aa-->a2,若字符串没有变短,返回原始字符
+     */
+    public String compressString(String S) {
+        if (S.length() == 0) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
+        int count = 1;
+        for (int i = 0, l = S.length(); i < l - 1; i++) {
+            if (S.charAt(i + 1) == S.charAt(i)) {
+                count++;
+            } else {
+                result.append(S.charAt(i)).append(count);
+                if (result.length() >= S.length()) {
+                    return S;
+                }
+                count = 1;
+            }
+        }
+        if (S.charAt(S.length() - 1) == S.charAt(S.length() - 2)) {
+            result.append(S.charAt(S.length() - 1)).append(count);
+        } else {
+            result.append(S.charAt(S.length() - 1)).append(count);
+        }
+        return result.length() < S.length() ? result.toString() : S;
     }
 }

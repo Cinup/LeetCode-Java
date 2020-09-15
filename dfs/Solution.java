@@ -227,6 +227,38 @@ public class Solution {
     }
 
     /*
+     * @description: 90.子集II
+     * @param: nums:包含重复元素的整数数组
+     * @return: 所有可能的子集
+     */
+    public List<List<Integer>> subsetsWithDup(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        Arrays.sort(nums);
+        //类似78题,只需要考虑重复元素
+        for (int i = 0, l = nums.length; i <= l; i++) {
+            List<List<Integer>> currentResult = new ArrayList<>();
+            subsetsWithDup(nums, i, 0, new ArrayDeque(), currentResult);
+            result.addAll(currentResult);
+        }
+        return result;
+    }
+
+    private void subsetsWithDup(int[] nums, int n, int start, Deque current, List<List<Integer>> currentResult) {
+        if (current.size() == n) {
+            currentResult.add(new ArrayList<>(current));
+            return;
+        }
+        for (int i = start, l = nums.length; i < l; i++) {
+            if (i > start && nums[i] == nums[i - 1]) {
+                continue;
+            }
+            current.addLast(nums[i]);
+            subsetsWithDup(nums, n, i + 1, current, currentResult);
+            current.removeLast();
+        }
+    }
+
+    /*
      * @description: 79.单词搜索
      * @param: board二维字符数组, word:字符串
      * @return: board路径中是否包含word中所有的字符,要求路径连续,且字符顺序一致
@@ -237,7 +269,6 @@ public class Solution {
             return word.isEmpty();
         }
         int n = board[0].length;
-        boolean[][] visited = new boolean[m][n];
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
                 if (exist(board, i, j, word, 0))
