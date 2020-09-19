@@ -9,77 +9,75 @@ import java.util.*;
 
 class Solution {
     /*
-     * @description: 1.两数之和,从数组中找出a,b使其和为目标值c
-     * @param: nums int数组,target目标值
-     * @return: a,b数组下标
+     * @description: 1.两数之和,从数组中找出两个数使其和为target
+     * @param: nums:int数组,target:目标值
+     * @return: int[]:数组下标
      */
     public int[] twoSum(int[] nums, int target) {
-        //存储值和下标
-        HashMap<Integer, Integer> numberMap = new HashMap();
+        //key:值 value:数组下标
+        HashMap<Integer, Integer> numberIndex = new HashMap();
         int[] result = new int[2];
         for (int i = 0, length = nums.length; i < length; i++) {
-            int difference = target - nums[i];
-            if (numberMap.containsKey(difference)) {
-                result[0] = numberMap.get(difference);
+            int index = numberIndex.getOrDefault(target - nums[i], -1);
+            if (index != -1) {
+                result[0] = index;
                 result[1] = i;
-                return result;
+                break;
             }
-            numberMap.put(nums[i], i);
+            numberIndex.put(nums[i], i);
         }
         return result;
     }
 
     /*
      * @description: 2.两数相加,将两个链表每个结点相加
-     * @param: l1,l2非空链表
-     * @return: 相加后的结果链表
+     * @param: l1,l2:非空链表
+     * @return: ListNode:相加后的结果链表
      */
     public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        ListNode resultNode = new ListNode(0);
+        ListNode cursor = new ListNode(0);
         //记录初始node的地址,用来return
-        ListNode index = resultNode;
+        ListNode head = cursor;
         int carry = 0;
         while (l1 != null || l2 != null || carry != 0) {
-            int val1 = l1 != null ? l1.val : 0;
-            int val2 = l2 != null ? l2.val : 0;
-            if (l1 != null) l1 = l1.next;
-            if (l2 != null) l2 = l2.next;
+            int val1 = 0, val2 = 0;
+            if (l1 != null) {
+                val1 = l1.val;
+                l1 = l1.next;
+            }
+            if (l2 != null) {
+                val2 = l2.val;
+                l2 = l2.next;
+            }
             int result = val1 + val2 + carry;
-            int val = result % 10;
             carry = result / 10;
-            ListNode tmpNode = new ListNode(val);
-            resultNode.next = tmpNode;
-            resultNode = resultNode.next;
+            cursor.next = new ListNode(result % 10);
+            cursor = cursor.next;
         }
-        return index.next;
+        return head.next;
     }
 
     /*
      * @description: 3.无重复的最长子串
-     * @param: s字符串
-     * @return: 无重复字符最长的子串
+     * @param: s:字符串
+     * @return: 无重复字符最长的字串的长度
      */
     public int lengthOfLongestSubstring(String s) {
-        int length = 0;
-        int i = 0, j = 0;
+        int maxLength = 0;
         int n = s.length();
-        Set<Character> characters = new HashSet<>();
-        while (i < n && j < n) {
-            char c = s.charAt(j);
-            if (characters.contains(c)) {
-                characters.remove(s.charAt(i));
-            } else {
-                length = Math.max(length, j - i);
-                j++;
-            }
+        Map<Character, Integer> charIndex = new HashMap<>();
+        for (int i = 0, j = 0; j < n; j++) {
+            i = Math.max(charIndex.getOrDefault(s.charAt(j), -1), i);
+            maxLength = Math.max(maxLength, j - i + 1);
+            charIndex.put(s.charAt(j), j + 1);
         }
-        return length;
+        return maxLength;
     }
 
     /*
      * @description: 4.寻找两个正序数组的中位数,时间复杂度O(log(m + n))
-     * @param: nums1,nums2 int数组
-     * @return: 中位数
+     * @param: nums1,nums2:int数组
+     * @return: double:中位数
      */
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
         int length1 = nums1.length, length2 = nums2.length;
@@ -123,14 +121,14 @@ class Solution {
 
     /*
      * @description: 5.最长回文子串,回文正反输出一样都字符串,例如aba
-     * @param: s字符串
-     * @return: 最长的回文子串
+     * @param: s:字符串
+     * @return: String:最长的回文子串
      */
     public String longestPalindrome(String s) {
         if (s == null || s.length() == 1) {
             return s;
         }
-        String ans = "";
+        String result = "";
         int n = s.length();
         int[][] dp = new int[n][n];
         //最外层为字符串长度
@@ -148,31 +146,31 @@ class Solution {
                         dp[i][j] = dp[i + 1][j - 1];
                     }
                 }
-                if (dp[i][j] > 0 && l + 1 > ans.length()) {
-                    ans = s.substring(i, i + 1 + l);
+                if (dp[i][j] > 0 && l + 1 > result.length()) {
+                    result = s.substring(i, i + 1 + l);
                 }
             }
         }
-        return ans;
+        return result;
     }
 
     /*
      * @description: 6.Z字形变换,将一个给定字符串根据给定的行数,以从上往下、从左到右进行 Z 字形排列。
-     * @param: s字符串,numRows行数
-     * @return: Z变换后的字符串
+     * @param: s:字符串,numRows:行数
+     * @return: String:Z变换后的字符串
      */
     public String convert(String s, int numRows) {
         if (numRows == 1) {
             return s;
         }
-        StringBuilder[] builders = new StringBuilder[numRows];
+        StringBuilder[] result = new StringBuilder[numRows];
         for (int i = 0; i < numRows; i++) {
-            builders[i] = new StringBuilder();
+            result[i] = new StringBuilder();
         }
         int count = 0;
         boolean addFlag = true;
         for (int i = 0, length = s.length(); i < length; i++) {
-            builders[count].append(s.charAt(i));
+            result[count].append(s.charAt(i));
             if (addFlag) count++;
             else count--;
             if (count == numRows) {
@@ -185,15 +183,15 @@ class Solution {
             }
         }
         for (int i = 1; i < numRows; i++) {
-            builders[0].append(builders[i]);
+            result[0].append(result[i]);
         }
-        return builders[0].toString();
+        return result[0].toString();
     }
 
     /*
-     * @description: 7.整数反转,123反转321
-     * @param: x整数
-     * @return: 反转后的整数
+     * @description: 7.整数反转,如123反转321
+     * @param: x:整数
+     * @return: int:反转后的整数
      */
     public int reverse(int x) {
         int result = 0;
@@ -206,22 +204,21 @@ class Solution {
             if (result != 0 && tmpResult / result < 10)
                 return 0;
             result = tmpResult;
-
         }
         return result;
     }
 
     /*
      * @description: 8.字符串转换整数 (atoi)
-     * @param: str字符串,允许开头为空格,可能包含其他字符
-     * @return: 字符串转换后的整数,如果超过32有符号整数的最大值,就返回最大值
+     * @param: str:字符串,允许开头为空格,可能包含其他字符
+     * @return: int:字符串转换后的整数,如果超过32有符号整数的最值,就返回最值
      */
     public int myAtoi(String str) {
-        int start = 0;
         int result = 0;
         int tmpResult = 0;
         int invalidResult = 0;
         int positive = 1;
+        int start = 0;
         int l = str.length();
         //首先去除空格
         for (; start < l; start++) {
@@ -265,17 +262,21 @@ class Solution {
     }
 
     /*
-     * @description: 9.回文数,判断一个数组是否为回文数(字符串形式上)
-     * @param: x整数
-     * @return: true是回文,false不是
+     * @description: 9.回文数,判断一个数是否为回文数(字符串形式上)
+     * @param: x:整数
+     * @return: boolean:是否为回文数
      */
     public boolean isPalindrome(int x) {
+        if (x == 0) {
+            return true;
+        }
         //负数不可能为回文数
         if (x < 0) {
             return false;
         }
+
         //最后一位不能是0,例如10,100不可能是回文数
-        if (x != 0 && (x % 10 == 0)) {
+        if (x % 10 == 0) {
             return false;
         }
         int bit;
@@ -322,8 +323,8 @@ class Solution {
 
     /*
      * @description: 11.盛最多水的容器
-     * @param: height[i]代表高度
-     * @return: 最大的面积
+     * @param: height:int数组,height[i]代表高度
+     * @return: int:最大的面积
      */
     public int maxArea(int[] height) {
         int l = 0, r = height.length - 1;
@@ -380,8 +381,8 @@ class Solution {
 
     /*
      * @description: 13.罗马数字转整数
-     * @param: s罗马数字,在 1 到 3999 的范围内
-     * @return: 对应的数字
+     * @param: s:罗马数字字符串,在1到3999的范围内
+     * @return: int:s对应的数字
      */
     public int romanToInt(String s) {
         Map<Character, Integer> romanMap = initMap();
@@ -416,8 +417,8 @@ class Solution {
 
     /*
      * @description: 14.最长公共前缀
-     * @param: strs字符串数组
-     * @return: 返回所有字符串最长公共前缀
+     * @param: strs:字符串数组
+     * @return: String:所有字符串最长公共前缀
      */
     public String longestCommonPrefix(String[] strs) {
         if (strs.length == 0) {
@@ -445,8 +446,8 @@ class Solution {
 
     /*
      * @description: 15.三数之和
-     * @param: nums int数组
-     * @return: 所有[a,b,c]使得a+b+c=0且a,b,c不重复
+     * @param: nums:int数组
+     * @return: List<List<Integer>>:所有[a,b,c]使得a+b+c=0且a,b,c不重复
      */
     public List<List<Integer>> threeSum(int[] nums) {
         //三数之和可以转化为两数字之和,例如[-1, 0, 1, 2, -1, -4]只需要依次找到两个和为[1,0,-1,-2,1,4]即可
@@ -493,8 +494,8 @@ class Solution {
 
     /*
      * @description: 16.最接近的三数之和
-     * @param: nums数组,target目标值
-     * @return: 最接近的目标值的三数之和
+     * @param: nums:数组,target:目标值
+     * @return: int:最接近的target的三数之和
      */
     public int threeSumClosest(int[] nums, int target) {
         //排序
@@ -528,16 +529,16 @@ class Solution {
 
     /*
      * @description: 17.电话号码的字母组合
-     * @param: digits数字字符串
-     * @return: 九空格所有字符组合
+     * @param: digits:数字字符串
+     * @return: List<String>:九空格所有字符组合
      */
     public List<String> letterCombinations(String digits) {
         List<String> result = new ArrayList<>();
         if (digits.isEmpty()) {
             return result;
         }
-        String[] letter = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
-        List<String>[] digitList = getListArray(letter);
+        String[] letters = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
+        List<String>[] digitList = getListArray(letters);
         for (int i = 0; i < digits.length(); i++) {
             List<String> charList = digitList[digits.charAt(i) - '0'];
             result = multiply(result, charList);
@@ -578,8 +579,8 @@ class Solution {
 
     /*
      * @description: 18.四数之和
-     * @param: nums数组,target目标值
-     * @return: 寻找所有不重复的a,b,c,d,使得a+b+c+d=target
+     * @param: nums:数组,target:目标值
+     * @return: List<List<Integer>>:所有[a,b,c,d]使得a+b+c=target且a,b,c,d不重复
      */
     public List<List<Integer>> fourSum(int[] nums, int target) {
         List<List<Integer>> result = new ArrayList<>();
@@ -631,17 +632,17 @@ class Solution {
 
     /*
      * @description: 19.删除链表的倒数第N个节点
-     * @param: head为链表头结点,n为待删除待倒数第n个,保证n是有效的
-     * @return: 返回删除后的头结点
+     * @param: head:链表头结点,n:待删除的倒数第n个,保证n是有效的
+     * @return: ListNode:返回删除后的头结点
      */
     public ListNode removeNthFromEnd(ListNode head, int n) {
         ListNode result = head;
-        ListNode tmpNode = head;
+        ListNode cursor = head;
         //计算链表长度
         int length = 0;
-        while (tmpNode != null) {
+        while (cursor != null) {
             length++;
-            tmpNode = tmpNode.next;
+            cursor = cursor.next;
         }
         //定位到第n个,就是正数length-n+1
         int index = length - n;
@@ -651,39 +652,101 @@ class Solution {
             result.next = null;
             return next;
         }
-        tmpNode = head;
+        cursor = head;
         ListNode pre = null;
         while (index > 0) {
-            pre = tmpNode;
-            tmpNode = tmpNode.next;
+            pre = cursor;
+            cursor = cursor.next;
             index--;
         }
-        pre.next = tmpNode.next;
+        pre.next = cursor.next;
         return result;
     }
 
-    //todo 20 and 21
+    /*
+     * @description: 20.有效的括号
+     * @param: s:只包含括号()[]{}的字符串
+     * @return: boolean:s是否有效
+     */
+    public boolean isValid(String s) {
+        Stack<Character> stack = new Stack<>();
+        for (int i = 0, l = s.length(); i < l; i++) {
+            char c = s.charAt(i);
+            if (stack.isEmpty() || isLeft(c)) {
+                stack.push(c);
+            } else {
+                if (stack.peek() == getRight(c)) {
+                    stack.pop();
+                }
+            }
+        }
+        return stack.isEmpty();
+    }
+
+    private boolean isLeft(char c) {
+        return c == '(' || c == '[' || c == '{';
+    }
+
+    private char getRight(char c) {
+        if (c == ')')
+            return '(';
+        if (c == ']')
+            return '[';
+        return '{';
+    }
+
+    /*
+     * @description: 21.合并两个有序链表
+     * @param: l1,l2:有序链表
+     * @return: ListNode:合并后的链表
+     */
+    public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+        ListNode head = new ListNode(0);
+        ListNode cursor = head;
+        while (l1 != null || l2 != null) {
+            if (l1 == null) {
+                cursor.next = new ListNode(l2.val);
+                l2 = l2.next;
+            } else if (l2 == null) {
+                cursor.next = new ListNode(l1.val);
+                l1 = l1.next;
+            } else {
+                if (l1.val < l2.val) {
+                    cursor.next = new ListNode(l1.val);
+                    l1 = l1.next;
+                } else {
+                    cursor.next = new ListNode(l2.val);
+                    l2 = l2.next;
+                }
+            }
+            cursor = cursor.next;
+        }
+        return head.next;
+    }
+
     /*
      * @description: 22.括号生成
-     * @param: n括号对数
-     * @return: 所有有效的可能性组合数
+     * @param: n:：括号对数
+     * @return: List<String>:所有有效的可能性组合数
      */
     public List<String> generateParenthesis(int n) {
         List<String> result = new ArrayList<>();
-        generate(result, 0, 0, "", n);
+        generateParenthesis(n, 0, 0, "", result);
         return result;
     }
 
-    private void generate(List<String> result, int l, int r, String s, int n) {
+    /*
+     * @description: 生成括号,n:括号对数,l:左括号数,r:右括号数,s:当前字符串,result:结果集
+     */
+    private void generateParenthesis(int n, int l, int r, String s, List<String> result) {
         if (l == n && r == n) {
             result.add(s);
-            return;
         }
         if (l < n) {
-            generate(result, l + 1, r, s + "(", n);
+            generateParenthesis(n, l + 1, r, s + "(", result);
         }
         if (r < l) {
-            generate(result, l, r + 1, s + ")", n);
+            generateParenthesis(n, l, r + 1, s + ")", result);
         }
     }
 
@@ -719,17 +782,58 @@ class Solution {
     }
 
     /*
+     * @description: 使用2路归并合并
+     */
+    public ListNode mergeKLists2(ListNode[] lists) {
+        if (lists.length == 0) {
+            return null;
+        }
+        if (lists.length == 1) {
+            return lists[0];
+        }
+        return merge(lists, 0, lists.length - 1);
+    }
+
+    private ListNode merge(ListNode[] lists, int l, int r) {
+        if (l == r) {
+            return lists[l];
+        }
+        if (l + 1 == r) {
+            return mergeTwoLists(lists[l], lists[r]);
+        }
+        int mid = (l + r) / 2;
+        ListNode l1 = merge(lists, l, mid);
+        ListNode l2 = merge(lists, mid + 1, r);
+        return mergeTwoLists(l1, l2);
+    }
+
+    /*
      * @description: 24.两两交换链表中的节点
      * @param: head链表头
-     * @return: 交换后的链表
+     * @return: ListNode:交换后的链表
      */
     public ListNode swapPairs(ListNode head) {
         //链表只有0个或1个结点时,无法交换
         if (head == null || head.next == null) {
             return head;
         }
-        ListNode current = head;
+//        ListNode current = head;
         ListNode next = head.next;
+        head.next = swapPairs(next.next);
+        next.next = head;
+        return next;
+    }
+
+    /*
+     * @description: 非递归实现
+     */
+    public ListNode swapPairs2(ListNode head) {
+        //链表只有0个或1个结点时,无法交换
+        if (head == null || head.next == null) {
+            return head;
+        }
+        ListNode current = head;
+        ListNode next = current.next;
         current.next = swapPairs(next.next);
         next.next = current;
         return next;
@@ -738,7 +842,7 @@ class Solution {
     /*
      * @description: 25.K个一组翻转链表
      * @param: head链表头结点,k数量
-     * @return: 翻转后的链表
+     * @return: ListNode:翻转后的链表
      */
     public ListNode reverseKGroup(ListNode head, int k) {
         if (head == null || head.next == null || k == 0) {
@@ -2760,6 +2864,26 @@ class Solution {
     }
 
     /*
+     * @description: 108.将有序数组转换为二叉搜索树
+     * @param: nums:int数组
+     * @return: TreeNode
+     */
+    public TreeNode sortedArrayToBST(int[] nums) {
+        return sortedArrayToBST(nums, 0, nums.length - 1);
+    }
+
+    private TreeNode sortedArrayToBST(int[] nums, int start, int end) {
+        if (start > end) {
+            return null;
+        }
+        int mid = start + (end - start) / 2;
+        TreeNode root = new TreeNode(nums[mid]);
+        root.left = sortedArrayToBST(nums, start, mid - 1);
+        root.right = sortedArrayToBST(nums, mid + 1, end);
+        return root;
+    }
+
+    /*
      * @description: 110.平衡二叉树
      * @param: root:二叉树根结点
      * @return: boolean:是否为平衡二叉树
@@ -2992,6 +3116,31 @@ class Solution {
         }
         for (int i = 0; i < k; ++i) {
             result[i] = queue.poll()[0];
+        }
+        return result;
+    }
+
+    /*
+     * @description: 404.左叶子之和
+     * @param: root:二叉树根结点
+     * @return: int:左叶子之和
+     */
+    public int sumOfLeftLeaves(TreeNode root) {
+        return root == null ? 0 : sum(root);
+    }
+
+    private int sum(TreeNode root) {
+        int result = 0;
+        if (root.left != null) {
+            //是叶子结点
+            if (root.left.left == null && root.left.right == null) {
+                result += root.left.val;
+            }else{
+                result += sum(root.left);
+            }
+        }
+        if (root.right != null) {
+            result += sum(root.right);
         }
         return result;
     }
