@@ -7,7 +7,7 @@ import java.util.*;
 
 public class LevelOrderBottom {
     /*
-     * @description: 94.二叉树的中序遍历
+     * @description: 94.二叉树的中序遍历,左--根--右
      * @param: root:二叉树根结点
      * @return: List<Integer>:中序遍历结果
      */

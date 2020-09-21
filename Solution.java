@@ -17,7 +17,8 @@ class Solution {
         //key:值 value:数组下标
         HashMap<Integer, Integer> numberIndex = new HashMap();
         int[] result = new int[2];
-        for (int i = 0, length = nums.length; i < length; i++) {
+        for (int i = 0, l = nums.length; i < l; i++) {
+            //判断与当前值和为target的值是否存在
             int index = numberIndex.getOrDefault(target - nums[i], -1);
             if (index != -1) {
                 result[0] = index;
@@ -35,9 +36,10 @@ class Solution {
      * @return: ListNode:相加后的结果链表
      */
     public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
-        ListNode cursor = new ListNode(0);
         //记录初始node的地址,用来return
-        ListNode head = cursor;
+        ListNode head = new ListNode(0);
+        //游标
+        ListNode cursor = head;
         int carry = 0;
         while (l1 != null || l2 != null || carry != 0) {
             int val1 = 0, val2 = 0;
@@ -64,9 +66,8 @@ class Solution {
      */
     public int lengthOfLongestSubstring(String s) {
         int maxLength = 0;
-        int n = s.length();
         Map<Character, Integer> charIndex = new HashMap<>();
-        for (int i = 0, j = 0; j < n; j++) {
+        for (int i = 0, j = 0, l = s.length(); j < l; j++) {
             i = Math.max(charIndex.getOrDefault(s.charAt(j), -1), i);
             maxLength = Math.max(maxLength, j - i + 1);
             charIndex.put(s.charAt(j), j + 1);
@@ -76,18 +77,17 @@ class Solution {
 
     /*
      * @description: 4.寻找两个正序数组的中位数,时间复杂度O(log(m + n))
-     * @param: nums1,nums2:int数组
+     * @param: nums1,nums2:有序int数组
      * @return: double:中位数
      */
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-        int length1 = nums1.length, length2 = nums2.length;
-        int count = length1 + length2;
+        int length = nums1.length + nums2.length;
         //奇数情况,取中间的一个数即可
-        if ((count & 1) == 1) {
-            return getTopK(nums1, 0, nums2, 0, count / 2 + 1) / 1.0;
+        if ((length & 1) == 1) {
+            return getTopK(nums1, 0, nums2, 0, length / 2 + 1) / 1.0;
         }
         //偶数情况,取中间2位数求平均值
-        return (getTopK(nums1, 0, nums2, 0, count / 2) + getTopK(nums1, 0, nums2, 0, count / 2 + 1)) / 2.0;
+        return (getTopK(nums1, 0, nums2, 0, length / 2) + getTopK(nums1, 0, nums2, 0, length / 2 + 1)) / 2.0;
     }
 
     /*
@@ -128,30 +128,27 @@ class Solution {
         if (s == null || s.length() == 1) {
             return s;
         }
-        String result = "";
         int n = s.length();
-        int[][] dp = new int[n][n];
+        //dp[i][j]即为s(i,j)是否为回文字串
+        boolean[][] dp = new boolean[n][n];
+        int start = 0;
+        int end = 0;
         //最外层为字符串长度
         for (int l = 0; l < n; l++) {
             for (int i = 0; i + l < n; i++) {
                 int j = i + l;
                 if (l == 0) {
-                    dp[i][j] = 1;
-                } else if (l == 1) {
-                    if (s.charAt(i) == s.charAt(j)) {
-                        dp[i][j] = 1;
-                    }
-                } else {
-                    if (s.charAt(i) == s.charAt(j)) {
-                        dp[i][j] = dp[i + 1][j - 1];
-                    }
+                    dp[i][j] = true;
+                } else if (s.charAt(i) == s.charAt(j)) {
+                    dp[i][j] = l == 1 ? true : dp[i + 1][j - 1];
                 }
-                if (dp[i][j] > 0 && l + 1 > result.length()) {
-                    result = s.substring(i, i + 1 + l);
+                if (dp[i][j] && l + 1 > (end - start)) {
+                    start = i;
+                    end = i + 1 + l;
                 }
             }
         }
-        return result;
+        return s.substring(start, end);
     }
 
     /*
@@ -327,16 +324,16 @@ class Solution {
      * @return: int:最大的面积
      */
     public int maxArea(int[] height) {
-        int l = 0, r = height.length - 1;
+        int left = 0, right = height.length - 1;
         //初始面积
-        int max = Math.min(height[l], height[r]) * (r - l);
-        while (l < r) {
-            if (height[l] < height[r]) {
-                l++;
+        int max = Math.min(height[left], height[right]) * (right - left);
+        while (left < right) {
+            if (height[left] < height[right]) {
+                left++;
             } else {
-                r--;
+                right--;
             }
-            int tmpArea = Math.min(height[l], height[r]) * (r - l);
+            int tmpArea = Math.min(height[left], height[right]) * (right - left);
             max = Math.max(max, tmpArea);
         }
         return max;
@@ -358,6 +355,7 @@ class Solution {
      */
     public String intToRoman(int num) {
         StringBuilder result = new StringBuilder();
+        String[] thousands = new String[]{"", "M", "MM", "MMM"};
         //0,100,...,900
         String[] hundreds = new String[]{"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
         //0,10,...,90
@@ -366,9 +364,7 @@ class Solution {
         String[] ones = new String[]{"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
         //千位
         int thousand = num / 1000;
-        for (int i = 0; i < thousand; i++) {
-            result.append("M");
-        }
+        result.append(thousands[thousand]);
         //百位
         int hundred = num % 1000 / 100;
         result.append(hundreds[hundred]);
@@ -427,21 +423,19 @@ class Solution {
         if (strs.length == 1) {
             return strs[0];
         }
-        int index = 0;
-        int minLength = Integer.MAX_VALUE;
         //找出字符串最短长度
-        for (int i = 0; i < strs.length; i++) {
+        int minLength = Integer.MAX_VALUE;
+        for (int i = 0, l = strs.length; i < l; i++) {
             minLength = Math.min(minLength, strs[i].length());
         }
         for (int i = 0; i < minLength; i++) {
             char c = strs[0].charAt(i);
-            for (int j = 1; j < strs.length; j++) {
+            for (int j = 1, l = strs.length; j < l; j++) {
                 if (strs[j].charAt(i) != c)
-                    return strs[0].substring(0, index);
+                    return strs[0].substring(0, i);
             }
-            index++;
         }
-        return strs[0].substring(0, index);
+        return strs[0].substring(0, minLength);
     }
 
     /*
@@ -490,6 +484,44 @@ class Solution {
             }
         }
         return result;
+    }
+
+    /*
+     * @description: 使用回溯法解决,时间复杂度太高,应该优先使用双指针
+     */
+    public List<List<Integer>> threeSum2(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        if (nums.length < 3) {
+            return result;
+        }
+        Arrays.sort(nums);
+        threeSum2(nums, 0, 0, new ArrayList<>(3), result);
+        return result;
+    }
+
+    public void threeSum2(int[] nums, int start, int sum, List<Integer> current, List<List<Integer>> result) {
+        if (current.size() == 3) {
+            if (sum == 0) {
+                result.add(new ArrayList<>(current));
+
+            }
+            return;
+        }
+        for (int i = start, l = nums.length; i < l; i++) {
+            //剪枝
+            //1.若a>0,b和c都大于0,不存在a+b+c=0
+            if (current.isEmpty() && nums[i] >0)
+                break;
+            //1.若a+b>0,c大于0,不存在a+b+c=0
+            if (current.size() == 1 && (sum + nums[i]) > 0)
+                break;
+            //去重
+            if (i > start && nums[i] == nums[i - 1])
+                continue;
+            current.add(nums[i]);
+            threeSum2(nums, i + 1, sum + nums[i], current, result);
+            current.remove(current.size() - 1);
+        }
     }
 
     /*
@@ -1081,7 +1113,6 @@ class Solution {
      * @description: 33.搜索旋转排序数组,[0,1,2,4,5,6,7]-->[4,5,6,7,0,1,2]
      * @param: nums数组不包含重复元素,target目标值
      * @return: target在数组中的下标,返回-1表示target不存在
-     * @date: 2020/9/2
      */
     public int search(int[] nums, int target) {
         if (nums.length == 0)
@@ -1300,7 +1331,8 @@ class Solution {
         return result;
     }
 
-    private void combinationSum(int[] nums, int target, int start, Deque<Integer> path, List<List<Integer>> res) {
+    private void combinationSum(int[] nums, int target, int start, Deque<
+            Integer> path, List<List<Integer>> res) {
         if (target == 0) {
             List<Integer> list = new ArrayList<>(path);
             res.add(list);
@@ -1581,9 +1613,6 @@ class Solution {
      */
     private boolean isValidPosition(List<Integer> current, int col) {
         int size = current.size();
-        if (size == 0) {
-            return true;
-        }
         for (int row = 0; row < size; row++) {
             int existCol = current.get(row);
             //当前列是否放置过
@@ -2607,7 +2636,8 @@ class Solution {
         return result;
     }
 
-    private void subsetsWithDup(int[] nums, int n, int start, Deque current, List<List<Integer>> currentResult) {
+    private void subsetsWithDup(int[] nums, int n, int start, Deque
+            current, List<List<Integer>> currentResult) {
         if (current.size() == n) {
             currentResult.add(new ArrayList<>(current));
             return;
@@ -2774,6 +2804,132 @@ class Solution {
     }
 
     /*
+     * @description: 95.不同的二叉搜索树II
+     * @param: n:1-n
+     * @return: List<TreeNode>:所有不同的二叉搜索树
+     */
+    public List<TreeNode> generateTrees(int n) {
+        if (n == 0) {
+            return new ArrayList<>();
+        }
+        return generateTrees(1, n);
+    }
+
+    private List<TreeNode> generateTrees(int start, int end) {
+        List<TreeNode> result = new ArrayList<>();
+        if (start > end) {
+            result.add(null);
+            return result;
+        }
+        if (start == end) {
+            TreeNode node = new TreeNode(start);
+            result.add(node);
+            return result;
+        }
+        //根结点从1-n遍历
+        for (int i = start; i <= end; i++) {
+            //左子树为start-(i-1)
+            List<TreeNode> leftTree = generateTrees(start, i - 1);
+            //右子树为(i+1)-end
+            List<TreeNode> rightTree = generateTrees(i + 1, end);
+            //左子树和右子树笛卡尔积
+            for (TreeNode left : leftTree) {
+                for (TreeNode right : rightTree) {
+                    TreeNode root = new TreeNode(i);
+                    root.left = left;
+                    root.right = right;
+                    result.add(root);
+                }
+            }
+        }
+        return result;
+    }
+
+    /*
+     * @description: 96.不同的二叉搜索树
+     * @param: n:1-n
+     * @return: int:所有不同的二叉搜索树的数量
+     */
+    public int numTrees(int n) {
+        return numTrees(n, new HashMap<>());
+    }
+
+    private int numTrees(int n, Map<Integer, Integer> memoization) {
+        int result = memoization.getOrDefault(n, -1);
+        if (result != -1) {
+            return result;
+        }
+        result = 0;
+        if (n == 0 || n == 1) {
+            return 1;
+        }
+        for (int i = 1; i <= n; i++) {
+            int leftNum = numTrees(i - 1, memoization);
+            int rightNum = numTrees(n - i, memoization);
+            result += leftNum * rightNum;
+        }
+        memoization.put(n, result);
+        return result;
+    }
+
+    /*
+     * @description: 97.交错字符串
+     * @param: s1,s2,s3:字符串
+     * @return: boolean:s3是否可以由s1和s2的字符交错组成
+     */
+    public boolean isInterleave(String s1, String s2, String s3) {
+        //1.s1==null && s2==null
+        //2.s1==null && s2!=null
+        //3.s1!=null && s2==null
+        if (s1 == null && s2 == null) {
+            return s3 == null;
+        }
+        if (s1 == null && s2 != null) {
+            return s2.equals(s3);
+        }
+        if (s2 == null) {
+            return s1.equals(s3);
+        }
+        if (s1.length() + s2.length() != s3.length()) {
+            return false;
+        }
+        return isInterleave(s1, 0, s2, 0, s3, 0);
+    }
+
+    private boolean isInterleave(String s1, int index1, String s2, int index2, String s3, int index3) {
+        if (index3 == s3.length()) {
+            return true;
+        }
+        if (index1 == s1.length()) {
+            return s2.substring(index2).equals(s3.substring(index3));
+        }
+        if (index2 == s2.length()) {
+            return s1.substring(index1).equals(s3.substring(index3));
+        }
+        char c1 = s1.charAt(index1);
+        char c2 = s2.charAt(index2);
+        char c3 = s3.charAt(index3);
+        //s1和s2首位都和s3匹配
+        //尝试s1匹配和s2匹配
+        if (c1 == c3 && c2 == c3) {
+            return isInterleave(s1, index1 + 1, s2, index2, s3, index3 + 1)
+                    || isInterleave(s1, index1, s2, index2 + 1, s3, index3 + 1);
+        }
+        //s1首位都和s3匹配
+        //将s1和s3向后推进一位
+        if (c1 == c3 && c2 != c3) {
+            return isInterleave(s1, index1 + 1, s2, index2, s3, index3 + 1);
+        }
+        //s2首位都和s3匹配
+        //将s2和s3向后推进一位
+        if (c2 == c3) {
+            return isInterleave(s1, index1, s2, index2 + 1, s3, index3 + 1);
+        }
+        //都不匹配,返回false
+        return false;
+    }
+
+    /*
      * @description: 98.验证二叉搜索树
      * @param: 二叉树根结点
      * @return: true有效二叉搜索树,false无效二叉搜索树
@@ -2794,6 +2950,12 @@ class Solution {
             }
         }
         return true;
+    }
+
+    public void recoverTree(TreeNode root) {
+        List<Integer> nodes = new ArrayList();
+        preorderTraversal(root, nodes);
+        Collections.sort(nodes);
     }
 
     /*
@@ -2846,6 +3008,57 @@ class Solution {
             result.add(depthMap.get(i));
         }
         return result;
+    }
+
+    /*
+     * @description: 105.从前序与中序遍历序列构造二叉树
+     * @param: preorder:inorder:
+     * @return: TreeNode
+     */
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        return buildTree(preorder, 0, preorder.length, inorder, 0, inorder.length);
+    }
+
+    private TreeNode buildTree(int[] preorder, int pStart, int pEnd, int[] inorder, int iStart, int iEnd) {
+        if (pStart == pEnd) {
+            return null;
+        }
+        int val = preorder[pStart];
+        TreeNode node = new TreeNode(val);
+        int index = 0;
+        for (int i = iStart; i < iEnd; i++) {
+            if (val == inorder[i]) {
+                index = i;
+                break;
+            }
+        }
+        int leftNum = index - iStart;
+        node.left = buildTree(preorder, pStart + 1, pStart + leftNum + 1, inorder, iStart, index);
+        node.right = buildTree(preorder, pStart + leftNum + 1, pEnd, inorder, index + 1, iEnd);
+        return node;
+    }
+
+    public TreeNode buildTree2(int[] inorder, int[] postorder) {
+        return buildTree2(inorder, 0, inorder.length, postorder, 0, postorder.length);
+    }
+
+    private TreeNode buildTree2(int[] inorder, int iStart, int iEnd, int[] postorder, int pStart, int pEnd) {
+        if (pStart == pEnd) {
+            return null;
+        }
+        int val = postorder[pEnd - 1];
+        TreeNode node = new TreeNode(val);
+        int index = 0;
+        for (int i = iStart; i < iEnd; i++) {
+            if (val == inorder[i]) {
+                index = i;
+                break;
+            }
+        }
+        int leftNum = index - iStart;
+        node.left = buildTree2(inorder, iStart, index, postorder, pStart, pStart + leftNum);
+        node.right = buildTree2(inorder, index + 1, iEnd, postorder, pStart + leftNum, pEnd - 1);
+        return node;
     }
 
     /*
@@ -3135,7 +3348,7 @@ class Solution {
             //是叶子结点
             if (root.left.left == null && root.left.right == null) {
                 result += root.left.val;
-            }else{
+            } else {
                 result += sum(root.left);
             }
         }
@@ -3256,6 +3469,27 @@ class Solution {
         //最后一个时间再加上duration
         result += duration;
         return result;
+    }
+
+    /*
+     * @description: 538.把二叉搜索树转换为累加树
+     * @param: root:二叉搜索树根结点
+     * @return: TreeNode:每个节点的值是原来的节点值加上所有大于它的节点值之和
+     */
+    public TreeNode convertBST(TreeNode root) {
+        convertBST(root, 0);
+        return root;
+    }
+
+    //使用全局变量会更好理解一些
+    private int convertBST(TreeNode node, int current) {
+        if (node == null) {
+            return current;
+        }
+        current = convertBST(node.right, current);
+        current += node.val;
+        node.val = current;
+        return convertBST(node.left, current);
     }
 
     /*
