@@ -8,6 +8,9 @@ import leetcode.entity.TreeNode;
 import java.util.*;
 
 class Solution {
+
+    int result = 0;
+
     /*
      * @description: 1.两数之和,从数组中找出两个数使其和为target
      * @param: nums:int数组,target:目标值
@@ -105,8 +108,8 @@ class Solution {
             return Math.min(nums1[index1], nums2[index2]);
         } else {
             int tmpK = k / 2 - 1;
-            int position1 = (index1 + tmpK) > nums1.length - 1 ? nums1.length - 1 : index1 + tmpK;
-            int position2 = (index2 + tmpK) > nums2.length - 1 ? nums2.length - 1 : index2 + tmpK;
+            int position1 = Math.min((index1 + tmpK), nums1.length - 1);
+            int position2 = Math.min((index2 + tmpK), nums2.length - 1);
             if (nums1[position1] >= nums2[position2]) {
                 position2 = position2 + 1;
                 k = k - (position2 - index2);
@@ -140,7 +143,7 @@ class Solution {
                 if (l == 0) {
                     dp[i][j] = true;
                 } else if (s.charAt(i) == s.charAt(j)) {
-                    dp[i][j] = l == 1 ? true : dp[i + 1][j - 1];
+                    dp[i][j] = l == 1 || dp[i + 1][j - 1];
                 }
                 if (dp[i][j] && l + 1 > (end - start)) {
                     start = i;
@@ -295,8 +298,8 @@ class Solution {
     /*
      * @description: 10.正则表达式匹配
      * @param: s字符串,p正则表达式,
-     * s 可能为空，且只包含从 a-z 的小写字母。
-     * p 可能为空，且只包含从 a-z 的小写字母，以及字符 . 和 *。
+     * s 可能为空,且只包含从 a-z 的小写字母。
+     * p 可能为空,且只包含从 a-z 的小写字母,以及字符 . 和 *。
      * '.' 匹配任意单个字符
      * '*' 匹配零个或多个前面的那一个元素
      * @return: true匹配,false不匹配
@@ -354,7 +357,6 @@ class Solution {
      *  M             1000
      */
     public String intToRoman(int num) {
-        StringBuilder result = new StringBuilder();
         String[] thousands = new String[]{"", "M", "MM", "MMM"};
         //0,100,...,900
         String[] hundreds = new String[]{"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
@@ -364,15 +366,15 @@ class Solution {
         String[] ones = new String[]{"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
         //千位
         int thousand = num / 1000;
-        result.append(thousands[thousand]);
-        //百位
         int hundred = num % 1000 / 100;
-        result.append(hundreds[hundred]);
         int ten = num % 100 / 10;
-        result.append(tens[ten]);
         int one = num % 10;
-        result.append(ones[one]);
-        return result.toString();
+        String result =
+                thousands[thousand] +
+                        hundreds[hundred] +
+                        tens[ten] +
+                        ones[one];
+        return result;
     }
 
     /*
@@ -425,8 +427,8 @@ class Solution {
         }
         //找出字符串最短长度
         int minLength = Integer.MAX_VALUE;
-        for (int i = 0, l = strs.length; i < l; i++) {
-            minLength = Math.min(minLength, strs[i].length());
+        for (String str : strs) {
+            minLength = Math.min(minLength, str.length());
         }
         for (int i = 0; i < minLength; i++) {
             char c = strs[0].charAt(i);
@@ -510,7 +512,7 @@ class Solution {
         for (int i = start, l = nums.length; i < l; i++) {
             //剪枝
             //1.若a>0,b和c都大于0,不存在a+b+c=0
-            if (current.isEmpty() && nums[i] >0)
+            if (current.isEmpty() && nums[i] > 0)
                 break;
             //1.若a+b>0,c大于0,不存在a+b+c=0
             if (current.size() == 1 && (sum + nums[i]) > 0)
@@ -561,35 +563,38 @@ class Solution {
 
     /*
      * @description: 17.电话号码的字母组合
-     * @param: digits:数字字符串
+     * @param: digits:2-9组成的字符串
      * @return: List<String>:九空格所有字符组合
+     * @example: digits为23,返回2对应的"abc"和3对应"def"的所有字符组合:["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"]
      */
     public List<String> letterCombinations(String digits) {
         List<String> result = new ArrayList<>();
-        if (digits.isEmpty()) {
-            return result;
-        }
-        String[] letters = {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
-        List<String>[] digitList = getListArray(letters);
-        for (int i = 0; i < digits.length(); i++) {
-            List<String> charList = digitList[digits.charAt(i) - '0'];
+        List<List<String>> letterList = getList();
+        for (int i = 0, l = digits.length(); i < l; i++) {
+            List<String> charList = letterList.get(digits.charAt(i) - '0');
             result = multiply(result, charList);
         }
         return result;
     }
 
     /*
-     * @description: 字符串数组转List数组
+     * @description: 字符串数组转List
      */
-    private List<String>[] getListArray(String[] letters) {
-        List<String>[] letterList = new ArrayList[letters.length];
-        for (int i = 0; i < letters.length; i++) {
-            String digit = letters[i];
-            List<String> result = new ArrayList<>();
-            for (int j = 0; j < digit.length(); j++) {
-                result.add(digit.charAt(j) + "");
+    private List<List<String>> getList() {
+        //0-9对应的九宫格
+        String[] letters = {
+                "", "", "abc",
+                "def", "ghi", "jkl",
+                "mno", "pqrs", "tuv",
+                "wxyz"
+        };
+        List<List<String>> letterList = new ArrayList(letters.length);
+        for (String letter : letters) {
+            List<String> charList = new ArrayList<>();
+            for (int j = 0, dl = letter.length(); j < dl; j++) {
+                charList.add(letter.charAt(j) + "");
             }
-            letterList[i] = result;
+            letterList.add(charList);
         }
         return letterList;
     }
@@ -668,7 +673,6 @@ class Solution {
      * @return: ListNode:返回删除后的头结点
      */
     public ListNode removeNthFromEnd(ListNode head, int n) {
-        ListNode result = head;
         ListNode cursor = head;
         //计算链表长度
         int length = 0;
@@ -676,12 +680,12 @@ class Solution {
             length++;
             cursor = cursor.next;
         }
-        //定位到第n个,就是正数length-n+1
+        //转换倒数为正数
         int index = length - n;
         //如果删除的是第一个,直接删除
         if (index == 0) {
-            ListNode next = result.next;
-            result.next = null;
+            ListNode next = head.next;
+            head.next = null;
             return next;
         }
         cursor = head;
@@ -692,7 +696,28 @@ class Solution {
             index--;
         }
         pre.next = cursor.next;
-        return result;
+        return head;
+    }
+
+    /*
+     * @description: 双指针做法,只需要遍历1遍
+     */
+    public ListNode removeNthFromEnd2(ListNode head, int n) {
+        ListNode newHead = new ListNode(0);
+        newHead.next = head;
+        ListNode fast = newHead;
+        ListNode slow = newHead;
+        while (n >= 0) {
+            fast = fast.next;
+            n--;
+        }
+        //第一个指针到达终点停止遍历
+        while (fast != null) {
+            fast = fast.next;
+            slow = slow.next;
+        }
+        slow.next = slow.next.next;
+        return newHead.next;
     }
 
     /*
@@ -709,6 +734,8 @@ class Solution {
             } else {
                 if (stack.peek() == getRight(c)) {
                     stack.pop();
+                } else {
+                    return false;
                 }
             }
         }
@@ -864,10 +891,9 @@ class Solution {
         if (head == null || head.next == null) {
             return head;
         }
-        ListNode current = head;
-        ListNode next = current.next;
-        current.next = swapPairs(next.next);
-        next.next = current;
+        ListNode next = head.next;
+        head.next = swapPairs(next.next);
+        next.next = head;
         return next;
     }
 
@@ -910,27 +936,49 @@ class Solution {
         return newHead;
     }
 
-    //todo 26,28
+    /*
+     * @description: 26.删除排序数组中的重复项
+     * @param: nums:排序数组
+     * @return: int:删除重复元素后的数组长度
+     */
+    public int removeDuplicates(int[] nums) {
+        if (nums.length < 2) {
+            return nums.length;
+        }
+        int slow = 0;
+        for (int fast = 1, l = nums.length; fast < l; fast++) {
+            if (nums[fast] != nums[slow]) {
+                slow++;
+                if (fast != slow) {
+                    nums[slow] = nums[fast];
+                }
+            }
+        }
+        //slow是下标,数量应该再加1
+        return slow + 1;
+    }
+
     /*
      * @description: 27. 移除元素
      * @param: nums:数组, val:需要移除的元素
      * @return: int: 移除val元素后的数组长度
      */
     public int removeElement(int[] nums, int val) {
-        int index = 0;
+        int slow = 0;
         for (int i = 0; i < nums.length; i++) {
             if (nums[i] != val) {
-                if (i != index) {
-                    int temp = nums[index];
-                    nums[index] = nums[i];
+                if (i != slow) {
+                    int temp = nums[slow];
+                    nums[slow] = nums[i];
                     nums[i] = temp;
                 }
-                index++;
+                slow++;
             }
         }
-        return index;
+        return slow;
     }
 
+    //todo 28
     /*
      * @description: 29.两数相除
      * @param: dividend被除数,divisor除数
@@ -996,10 +1044,10 @@ class Solution {
         //字符串长度
         final int wordLength = words[0].length();
         Map<String, Integer> wordsMap = new HashMap<>();
-        for (int i = 0; i < wordsNum; i++) {
-            int num = wordsMap.getOrDefault(words[i], 0);
+        for (String value : words) {
+            int num = wordsMap.getOrDefault(value, 0);
             num++;
-            wordsMap.put(words[i], num);
+            wordsMap.put(value, num);
         }
         //遍历字符串
         int end = s.length() - wordsNum * wordLength + 1;
@@ -1076,7 +1124,7 @@ class Solution {
         }
 
         Stack<Entry> stack = new Stack<>();
-        boolean[] valid = new boolean[s.length()];
+        boolean[] validArray = new boolean[s.length()];
         for (int i = 0, length = s.length(); i < length; i++) {
             char c = s.charAt(i);
             //1.栈为空
@@ -1089,21 +1137,21 @@ class Solution {
             //栈不为空且为右括号
             Entry topEntry = stack.peek();
             if (topEntry.getC() == '(') {
-                valid[i] = true;
-                valid[topEntry.getIndex()] = true;
+                validArray[i] = true;
+                validArray[topEntry.getIndex()] = true;
                 stack.pop();
             } else {
                 Entry entry = new Entry(i, c);
                 stack.push(entry);
             }
         }
-        int tempRusult = 0;
-        for (int i = 0, length = valid.length; i < length; i++) {
-            if (valid[i]) {
-                tempRusult++;
-                result = Math.max(result, tempRusult);
+        int count = 0;
+        for (boolean validStatus : validArray) {
+            if (validStatus) {
+                count++;
+                result = Math.max(result, count);
             } else {
-                tempRusult = 0;
+                count = 0;
             }
         }
         return result;
@@ -1319,6 +1367,29 @@ class Solution {
         return true;
     }
 
+    public String countAndSay(int n) {
+        String result = "1";
+        if (n == 1)
+            return result;
+        for (int i = 1; i < n; i++) {
+            StringBuilder temp = new StringBuilder();
+            char c = result.charAt(0);
+            int count = 1;
+            for (int j = 1, l = result.length(); j < l; j++) {
+                if (result.charAt(j) == result.charAt(j - 1)) {
+                    count++;
+                } else {
+                    temp.append(count).append(c);
+                    c = result.charAt(j);
+                    count = 0;
+                }
+            }
+            temp.append(count).append(c);
+            result = temp.toString();
+        }
+        return result;
+    }
+
     /*
      * @description: 39.组合总和
      * @param: candidates 无重复元素int数组, target目标值
@@ -1326,31 +1397,62 @@ class Solution {
      */
     public List<List<Integer>> combinationSum(int[] candidates, int target) {
         List<List<Integer>> result = new ArrayList<>();
-        Deque<Integer> path = new ArrayDeque<>();
-        combinationSum(candidates, target, 0, path, result);
+        combinationSum(candidates, target, 0, new ArrayDeque<>(), result);
         return result;
     }
 
-    private void combinationSum(int[] nums, int target, int start, Deque<
-            Integer> path, List<List<Integer>> res) {
+    private void combinationSum(int[] nums, int target, int start, Deque<Integer> current, List<List<Integer>> result) {
         if (target == 0) {
-            List<Integer> list = new ArrayList<>(path);
-            res.add(list);
+            List<Integer> list = new ArrayList<>(current);
+            result.add(list);
             return;
         }
         if (target > 0) {
             for (int i = start, length = nums.length; i < length; i++) {
                 if (nums[i] <= target) {
-                    path.addLast(nums[i]);
-                    combinationSum(nums, target - nums[i], i, path, res);
-                    path.removeLast();
+                    current.addLast(nums[i]);
+                    combinationSum(nums, target - nums[i], i, current, result);
+                    current.removeLast();
                 }
             }
         }
     }
 
     /*
-     * @description: 41.缺失的第一个正数,算法的时间复杂度应为O(n)，并且只能使用常数级别的额外空间
+     * @description: 40.组合总和II
+     * @param: candidates:有重复元素数组,target:目标数,所有数字都是正整数
+     * @return: candidates中所有可以使数字和为target的组合,每个candidates[i]只能被选取一次
+     */
+    public List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        Arrays.sort(candidates);//有重复数据,先排序
+        List<List<Integer>> result = new ArrayList<>();
+        combinationSum2(candidates, target, 0, new ArrayDeque<>(), result);
+        return result;
+    }
+
+    private void combinationSum2(int[] nums, int target, int start, Deque<Integer> current, List<List<Integer>> result) {
+        if (target == 0) {
+            result.add(new ArrayList<>(current));
+            return;
+        }
+        if (target > 0) {
+            for (int i = start, length = nums.length; i < length; i++) {
+                if (nums[i] <= target) {
+                    //上一轮已经选过直接跳过
+                    if (i > start && nums[i] == nums[i - 1])
+                        continue;
+                    current.addLast(nums[i]);
+                    combinationSum2(nums, target - nums[i], i + 1, current, result);
+                    current.removeLast();
+                } else {
+                    return;
+                }
+            }
+        }
+    }
+
+    /*
+     * @description: 41.缺失的第一个正数,算法的时间复杂度应为O(n),并且只能使用常数级别的额外空间
      * @param: nums数组
      * @return: 确实的第一个正数
      */
@@ -2058,6 +2160,34 @@ class Solution {
     }
 
     /*
+     * @description: 72.编辑距离
+     * @param: [word1, word2]
+     * @return: int
+     */
+    public int minDistance(String word1, String word2) {
+        int l1 = word1.length();
+        int l2 = word2.length();
+        //dp[i][j]表示word1前i和字符到word2前j个字符的编辑距离
+        //0表示空字符串,所以需要再多申请一个数组空间
+        int dp[][] = new int[l1 + 1][l2 + 1];
+        int equal = 1;
+        for (int i = 0; i <= l1; i++) {
+            for (int j = 0; j <= l2; j++) {
+                if (i == 0 || j == 0) {
+                    dp[i][j] = i == 0 ? j : i;
+                } else {
+                    if (word1.charAt(i - 1) == word2.charAt(j - 1)) {
+                        equal = 0;
+                    }
+                    dp[i][j] = Math.min(dp[i - 1][j - 1] + equal, Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1));
+                    equal = 1;
+                }
+            }
+        }
+        return dp[l1][l2];
+    }
+
+    /*
      * @description: 73.矩阵置零,如果一个元素为0,则将其所在行和列的所有元素都设为0
      * @param: matrix:二维int数组
      * @return:
@@ -2110,7 +2240,7 @@ class Solution {
                 return true;
             else if (midInt < target)
                 l = mid + 1;
-            else if (midInt > target)
+            else //if (midInt > target)
                 h = mid - 1;
         }
         return false;
@@ -2228,7 +2358,7 @@ class Solution {
         //问题分解为77题从n个不重复数中取k个,k从0～n遍历即可
         for (int i = 0, l = nums.length; i <= nums.length; i++) {
             List<List<Integer>> currentResult = new ArrayList<>();
-            subsets(nums, i, 0, new ArrayDeque(), currentResult);
+            subsets(nums, i, 0, new ArrayDeque<Integer>(), currentResult);
             result.addAll(currentResult);
         }
         return result;
@@ -2237,7 +2367,7 @@ class Solution {
     /*
      * @description:从nums中选取n个
      */
-    private void subsets(int[] nums, int n, int start, Deque current, List<List<Integer>> currentResult) {
+    private void subsets(int[] nums, int n, int start, Deque<Integer> current, List<List<Integer>> currentResult) {
         if (current.size() == n) {
             currentResult.add(new ArrayList<>(current));
             return;
@@ -2304,7 +2434,7 @@ class Solution {
      * @param: nums:排序数组
      * @return: 删除重复元素后的长度,重复元素最多出现2次
      */
-    public int removeDuplicates(int[] nums) {
+    public int removeDuplicates2(int[] nums) {
         int n = nums.length;
         //当数组内元素数量不超过2时,无论如何都是满足条件都
         if (n <= 2) {
@@ -2425,8 +2555,7 @@ class Solution {
                 val = head.val;
                 isFirst = true;
                 if (head.next == null) {
-                    ListNode node = new ListNode(val);
-                    cursor.next = node;
+                    cursor.next = new ListNode(val);
                 }
             }
             head = head.next;
@@ -2453,8 +2582,7 @@ class Solution {
                 int height = heights[stack.pop()];
                 int left = stack.isEmpty() ? -1 : stack.peek();
                 //当前比栈顶小,但是前一个一定不会比栈顶小,否则当前栈顶肯定已经被出栈了
-                int right = p;
-                int area = (right - left - 1) * height;
+                int area = (p - left - 1) * height;
                 maxArea = Math.max(area, maxArea);
 
             }
@@ -2471,7 +2599,7 @@ class Solution {
     }
 
     /*
-     * @description: 86.分隔链表 给定一个链表和一个特定值 x，对链表进行分隔，使得所有小于 x 的节点都在大于或等于 x 的节点之前。
+     * @description: 86.分隔链表 给定一个链表和一个特定值 x,对链表进行分隔,使得所有小于 x 的节点都在大于或等于 x 的节点之前。
      * @param: head链表,x特定值
      * @return: 分割后的链表
      */
@@ -2509,7 +2637,7 @@ class Solution {
             return s2 == null;
         }
         if (s2 == null) {
-            return s1 == null;
+            return false;
         }
         //判断长度
         if (s1.length() != s2.length()) {
@@ -2717,6 +2845,7 @@ class Solution {
         count++;
         //反转链表
         while (count < n) {
+            count++;
             ListNode temp = head.next;
             head.next = pre;
             pre = head;
@@ -2884,7 +3013,7 @@ class Solution {
         if (s1 == null && s2 == null) {
             return s3 == null;
         }
-        if (s1 == null && s2 != null) {
+        if (s1 == null) {
             return s2.equals(s3);
         }
         if (s2 == null) {
@@ -2917,7 +3046,7 @@ class Solution {
         }
         //s1首位都和s3匹配
         //将s1和s3向后推进一位
-        if (c1 == c3 && c2 != c3) {
+        if (c1 == c3) {
             return isInterleave(s1, index1 + 1, s2, index2, s3, index3 + 1);
         }
         //s2首位都和s3匹配
@@ -2952,10 +3081,13 @@ class Solution {
         return true;
     }
 
+    /*
+     * @description: 99.恢复二叉搜索树
+     * @param: root
+     * @return: void
+     */
     public void recoverTree(TreeNode root) {
-        List<Integer> nodes = new ArrayList();
-        preorderTraversal(root, nodes);
-        Collections.sort(nodes);
+
     }
 
     /*
@@ -2977,9 +3109,7 @@ class Solution {
      * @description: 层序遍历
      */
     private void levelOrderTraversal(Map<Integer, List<Integer>> map, TreeNode node, int depth) {
-        if (node == null)
-            return;
-        else {
+        if (node != null) {
             if (map.containsKey(depth)) {
                 map.get(depth).add(node.val);
             } else {
@@ -3460,11 +3590,7 @@ class Solution {
         int result = 0;
         for (int i = 1; i < length; i++) {
             int time = timeSeries[i] - timeSeries[i - 1];
-            if (time >= duration) {
-                result += duration;
-            } else {
-                result += time;
-            }
+            result += Math.min(time, duration);
         }
         //最后一个时间再加上duration
         result += duration;
@@ -3493,6 +3619,33 @@ class Solution {
     }
 
     /*
+     * @description: 617.合并二叉树
+     * @param: t1,t2: 二叉搜索树结点
+     * @return: TreeNode:合并后的二叉树根结点
+     */
+    public TreeNode mergeTrees(TreeNode t1, TreeNode t2) {
+        if (t1 == null && t2 == null) {
+            return null;
+        }
+        TreeNode node = new TreeNode();
+        if (t1 == null) {
+            node.val = t2.val;
+            node.left = mergeTrees(null, t2.left);
+            node.right = mergeTrees(null, t2.right);
+        } else if (t2 == null) {
+            node.val = t1.val;
+            node.left = mergeTrees(t1.left, null);
+            node.right = mergeTrees(t1.right, null);
+        } else {
+            node.val = t1.val + t2.val;
+            node.left = mergeTrees(t1.left, t2.left);
+            node.right = mergeTrees(t1.right, t2.right);
+        }
+        return node;
+    }
+
+
+    /*
      * @description: 628.三个数的最大乘积
      * @param: nums数组
      * @return: 三个数最大乘积
@@ -3519,9 +3672,7 @@ class Solution {
     }
 
     private void averageOfLevels(Map<Integer, Entry> map, TreeNode node, int depth) {
-        if (node == null)
-            return;
-        else {
+        if (node != null) {
             Entry entry = map.getOrDefault(depth, new Entry(0, 0.0));
             entry.setCount(entry.getCount() + 1);
             entry.setSum(entry.getSum() + node.val);
@@ -3555,6 +3706,39 @@ class Solution {
         errorSum = errorSum - errorNum;
         int missNum = sum - errorSum;
         return new int[]{errorNum, missNum};
+    }
+
+    /*
+     * @description: 968.监控二叉树,给定一个二叉树,我们在树的节点上安装摄像头。节点上的每个摄影头都可以监视其父对象、自身及其直接子对象。
+     * @param: root:二叉树根结点
+     * @return: int:监控所有结点需要的摄像头数量最小值
+     */
+    public int minCameraCover(TreeNode root) {
+        //还需要考虑根结点的状态
+        return minCamera(root) == 0 ? result + 1 : result;
+    }
+
+    /*
+     * @description: 自底向上,从左右子树的状态来推断当前结点的状态
+     * @return: 0-->未监控,1-->被监控,2-->安装摄像头
+     */
+    private int minCamera(TreeNode node) {
+        if (node == null)
+            return 1;
+        //判断左右子树的状态
+        int leftStatus = minCamera(node.left);
+        int rightStatus = minCamera(node.right);
+        //左右子树被覆盖,说明左右子树无摄像头,这时该结点处于未监控状态,这是让父结点去安装摄像头
+        if (leftStatus == 1 && rightStatus == 1)
+            return 0;
+        //左右子树有未被监控的,当前结点必须要安装摄像头
+        //0 0 0 1 0 2 1 0 2 0
+        if (leftStatus == 0 || rightStatus == 0) {
+            result++;
+            return 2;
+        }
+        //剩余可能性为leftStatus == 2||rightStatus == 2,这时父结点被监控
+        return 1;
     }
 
     /*
@@ -3633,7 +3817,7 @@ class Solution {
             return s2 == null;
         }
         if (s2 == null) {
-            return s1 == null;
+            return false;
         }
         if (s1.length() != s2.length()) {
             return false;
