@@ -82,10 +82,8 @@ public class Solution {
             if (target == 0) {
                 List<Integer> list = new ArrayList<>(current);
                 result.add(list);
-                return;
-            } else {
-                return;
             }
+            return;
         }
         for (int i = start; i <= 9; i++) {
             if (i <= target) {

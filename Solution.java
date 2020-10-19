@@ -735,7 +735,7 @@ class Solution {
                 if (stack.peek() == getRight(c)) {
                     stack.pop();
                 } else {
-                    return false;
+                    break;
                 }
             }
         }
@@ -1911,7 +1911,7 @@ class Solution {
     }
 
     /*
-     * @description: 59.螺旋矩阵 II
+     * @description: 59.螺旋矩阵II
      * @param: n 正整数
      * @return: 生产1-n^2螺旋矩阵
      */
@@ -3008,17 +3008,18 @@ class Solution {
      */
     public boolean isInterleave(String s1, String s2, String s3) {
         //1.s1==null && s2==null
-        //2.s1==null && s2!=null
-        //3.s1!=null && s2==null
         if (s1 == null && s2 == null) {
             return s3 == null;
         }
+        //2.s1==null && s2!=null
         if (s1 == null) {
             return s2.equals(s3);
         }
+        //3.s1!=null && s2==null
         if (s2 == null) {
             return s1.equals(s3);
         }
+        //4.s1!=null && s2!=null
         if (s1.length() + s2.length() != s3.length()) {
             return false;
         }
@@ -3297,9 +3298,7 @@ class Solution {
      */
     public void flatten(TreeNode root) {
         while (root != null) {
-            if (root.left == null) {
-                root = root.right;
-            } else {
+            if (root.left != null) {
                 TreeNode oldRight = root.right;
                 TreeNode newRight = root.left;
                 root.right = newRight;
@@ -3308,14 +3307,14 @@ class Solution {
                     newRight = newRight.right;
                 }
                 newRight.right = oldRight;
-                root = root.right;
             }
+            root = root.right;
         }
     }
 
     /*
      * @description: 116.填充每个节点的下一个右侧节点指针
-     * @param: root: 一个完美二叉树根结点
+     * @param: root: 完美二叉树根结点
      * @return: Node:
      */
     public Node connect(Node root) {
@@ -3332,6 +3331,91 @@ class Solution {
         root.right.next = (root.next == null) ? null : root.next.left;
         connect(root.left);
         connect(root.right);
+    }
+
+    /*
+     * @description: 117.填充每个节点的下一个右侧节点指针II
+     * @param: root:二叉树根结点
+     * @return: leetcode.entity.Node
+     */
+    public Node connect2(Node root) {
+        connectNode2(root);
+        return root;
+    }
+
+    private void connectNode2(Node node) {
+        if (node == null) {
+            return;
+        }
+        if (node.left == null && node.right == null) {
+            return;
+        }
+        if (node.left != null && node.right != null) {
+            node.left.next = node.right;
+            node.right.next = getNextChildNode(node.next);
+
+        } else if (node.left == null) {
+            node.right.next = getNextChildNode(node.next);
+        } else if (node.right == null) {
+            node.left.next = getNextChildNode(node.next);
+        }
+        connectNode2(node.left);
+        connectNode2(node.right);
+    }
+
+    //处理next
+    private Node getNextChildNode(Node node) {
+        while (true) {
+            if (node == null) {
+                return null;
+            } else {
+                if (node.left != null) {
+                    return node.left;
+                } else if (node.right != null) {
+                    return node.right;
+                }
+            }
+            node = node.next;
+        }
+    }
+
+    /*
+     * @description: 128.最长连续序列
+     * @param: nums: int数组
+     * @return: int: 最长连续序列的长度
+     */
+    public int longestConsecutive(int[] nums) {
+        Set<Integer> numSet = new HashSet<>();
+        for (int num : nums) {
+            numSet.add(num);
+        }
+        int maxCount = 0;
+        int count = 0;
+        for (int num : nums) {
+            if (!numSet.contains(num - 1)) {
+                count = 0;
+                while (numSet.contains(num)) {
+                    count++;
+                    num++;
+                }
+            }
+            maxCount = Math.max(maxCount, count);
+        }
+        return maxCount;
+    }
+
+    /*
+     * @description: 142.环形链表II
+     * @param: head:链表头结点
+     * @return: ListNode: 入环的第一个结点,当链表无环时返回null
+     */
+    public ListNode detectCycle(ListNode head) {
+        Set<ListNode> nodeSet = new HashSet<>();
+        while (head != null) {
+            if (nodeSet.add(head) == false)
+                return head;
+        }
+        return null;
     }
 
     /*
@@ -3441,6 +3525,7 @@ class Solution {
             countMap.put(num, countMap.getOrDefault(num, 0) + 1);
         }
         PriorityQueue<int[]> queue = new PriorityQueue<>(new Comparator<int[]>() {
+            @Override
             public int compare(int[] m, int[] n) {
                 return m[1] - n[1];
             }
@@ -3516,6 +3601,35 @@ class Solution {
             }
         }
         return third == Long.MIN_VALUE ? (int) max : (int) third;
+    }
+
+    public boolean canPartition(int[] nums) {
+        int sum = 0;
+        for (int i = 0, l = nums.length; i < l; i++) {
+            sum += nums[i];
+        }
+
+        if ((sum & 1) == 1) {
+            return false;
+        }
+        return canPartition(nums, 0, nums.length, 0, sum / 2, new HashMap<String, Boolean>());
+    }
+
+    private boolean canPartition(int[] nums, int start, int end, int current, int target, Map<String, Boolean> memoization) {
+        String key = current + "#" + start;
+        if (memoization.containsKey(key)) {
+            return memoization.get(key);
+        }
+        if (start >= end || current > target) {
+            return false;
+        }
+        if (current == target) {
+            return true;
+        }
+        boolean result = canPartition(nums, start + 1, end, current + nums[start], target, memoization)
+                || canPartition(nums, start + 1, end, current, target, memoization);
+        memoization.put(key, result);
+        return result;
     }
 
     /*
@@ -3644,7 +3758,6 @@ class Solution {
         return node;
     }
 
-
     /*
      * @description: 628.三个数的最大乘积
      * @param: nums数组
@@ -3707,6 +3820,65 @@ class Solution {
         int missNum = sum - errorSum;
         return new int[]{errorNum, missNum};
     }
+
+    /*
+     * @description: 844.比较含退格的字符串
+     * @param: S,T: 含有推格符'#'的字符串
+     * @return: boolean:返回S和T是否相等,推格符会删除前一个字符
+     */
+    public boolean backspaceCompare(String S, String T) {
+        if (S == null || T == null) {
+            return S == T;
+        }
+        int indexS = S.length() - 1, indexT = T.length() - 1;
+        int skipS = 0;
+        int skipT = 0;
+        while (indexS >= 0 || indexT >= 0) {
+            //删除字符,定位到需要比较到字符
+            while (indexS >= 0) {
+                if (S.charAt(indexS) == '#') {
+                    skipS++;
+                    indexS--;
+                } else {
+                    if (skipS > 0) {
+                        skipS--;
+                        indexS--;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            while (indexT >= 0) {
+                if (T.charAt(indexT) == '#') {
+                    skipT++;
+                    indexT--;
+                } else {
+                    if (skipT > 0) {
+                        skipT--;
+                        indexT--;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            //如果S和T都还有字符就比较S和T的字符
+            if (indexS >= 0 && indexT >= 0) {
+                if (S.charAt(indexS) == T.charAt(indexT)) {
+                    indexS--;
+                    indexT--;
+                } else {
+                    return false;
+                }
+            } else {
+                //当S或者T其中一个已经没有字符了
+                if (indexS >= 0 || indexT >= 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 
     /*
      * @description: 968.监控二叉树,给定一个二叉树,我们在树的节点上安装摄像头。节点上的每个摄影头都可以监视其父对象、自身及其直接子对象。
